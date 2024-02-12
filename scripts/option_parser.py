@@ -51,16 +51,16 @@ def parser_arguments():
                                help='Path to file with a list of splice sites',
                                )
     optional_args.add_argument('--downsampling_min_thr',
-                              default=5,
-                              type=int,
-                              help='The number of reads per gene less than a specified value is considered noise and '
-                                   'is excluded from the analysis [default: 5]',
-                              )
+                               default=5,
+                               type=int,
+                               help='The number of reads per gene less than a specified value is considered noise and '
+                                    'is excluded from the analysis [default: 5]',
+                               )
     optional_args.add_argument('--downsampling_max_thr',
-                              default=1000,
-                              type=int,
-                              help='Number of reads per gene remaining after downsampling [default: 1000]',
-                              )
+                               default=1000,
+                               type=int,
+                               help='Number of reads per gene remaining after downsampling [default: 1000]',
+                               )
     optional_args.add_argument('--iso_thr1',  # '--n_reads_per_iso_thr_2nd',
                                default=5,
                                type=int,
