@@ -90,7 +90,8 @@ def find_closest_sites(pos_of_introns, d_of_illumina_sites_chr):
 
         for split_start in [split_by_starts - 1, split_by_starts, split_by_starts + 1]:
             if split_start in d_of_illumina_sites_chr.keys():
-                l_of_potential_sites.extend(find_potential_ill_sites(sorted(d_of_illumina_sites_chr[split_start]), start, stop))
+                l_of_potential_sites.extend(find_potential_ill_sites(sorted(d_of_illumina_sites_chr[split_start]),
+                                                                     start, stop))
 
         if l_of_potential_sites:
             for intersected_site in l_of_potential_sites:
@@ -100,9 +101,6 @@ def find_closest_sites(pos_of_introns, d_of_illumina_sites_chr):
                     closest_start_distance = cur_distance
                     best_positions = intersected_site
             res_l_correct_sites.append(best_positions)
-        with open('lv_changed_splice_sites.tsv', 'a') as ouf:  # TODO: REMOVE IT
-            best_pos_str = '\t'.join(list(map(str, best_positions)))
-            ouf.write(f'{str(start)}\t{str(stop)}\t{best_pos_str}\n')
 
     return res_l_correct_sites
 
@@ -140,18 +138,19 @@ def prepare_data_for_multiprocessing(sam_lines, n_proc):
     return data_by_proc
 
 
-def add_ill_sites_to_reads(sam_lines, d_of_illumina_sites):
-    with open('lv_changed_splice_sites.tsv', 'w') as ouf:  # TODO: REMOVE IT
-        ouf.write('read_id\tstart_ONT\tend_ONT\tstart_Ill\tend_Ill\n')
-
+def extract_splice_sites(sam_lines, d_of_illumina_sites):
     l_res_lines = []
     for line_l in sam_lines:
         read_id, orientation, chrom, start_coord, cigar_str = line_l
         end_coord, pos_of_introns = get_correct_intron_and_end_pos(cigar_str, start_coord)
-        if f'{chrom}*{orientation}' in d_of_illumina_sites.keys():
-            l_correct_pos = find_closest_sites(pos_of_introns, d_of_illumina_sites[f'{chrom}*{orientation}'])
+
+        if d_of_illumina_sites:
+            if f'{chrom}*{orientation}' in d_of_illumina_sites.keys():
+                l_correct_pos = find_closest_sites(pos_of_introns, d_of_illumina_sites[f'{chrom}*{orientation}'])
+            else:
+                l_correct_pos = []
         else:
-            l_correct_pos = [tuple()]  # TODO: check it
+            l_correct_pos = pos_of_introns
 
         str_introns = ';'.join(['%s-%s' % pos for pos in l_correct_pos])
         res_line = f'{read_id}\t{chrom}\t{orientation}\t{start_coord}\t{end_coord}\t{str_introns}'
@@ -170,28 +169,15 @@ def change_to_correct_splice_sites(sam_file, ill_sites, num_threads, common_outd
         os.mkdir(changed_splice_sites_dir)
     out_fname = changed_splice_sites_dir + os.path.basename(sam_file).replace('.sam', '.tsv')
 
-    d_of_ill_sites = get_d_illumina_splice_sites(ill_sites)
     sam_lines = read_sam_file(sam_file)
     data_by_proc = prepare_data_for_multiprocessing(sam_lines, num_threads)
-
-    results = Parallel(n_jobs=num_threads)(delayed(add_ill_sites_to_reads)(lines_l, d_of_ill_sites)
-                                           for lines_l in data_by_proc.values())
+    if ill_sites:
+        d_of_ill_sites = get_d_illumina_splice_sites(ill_sites)
+        results = Parallel(n_jobs=num_threads)(delayed(extract_splice_sites)(lines_l, d_of_ill_sites)
+                                               for lines_l in data_by_proc.values())
+    else:
+        results = Parallel(n_jobs=num_threads)(delayed(extract_splice_sites)(lines_l, None)
+                                               for lines_l in data_by_proc.values())
     merged_results = functools.reduce(lambda x, y: x.extend(y) or x, results)
     make_final_file(out_fname, merged_results)
     return changed_splice_sites_dir
-
-
-# if __name__ == '__main__':
-#     num_threads = 1
-#     sam_file = './downsampled/unique_map_final_leaf_replicate_1__adapters_trimmed.sam'
-#     ill_sites = '../../dev_pipeline_splicing/mapping_illumina/filtered_splice_sites_with_orientation.tsv'
-#     common_outdir = './'
-#     change_to_correct_splice_sites(sam_file, ill_sites, num_threads, common_outdir)
-
-
-if __name__ == '__main__':
-    num_threads = 1
-    sam_file = '../test/unique_map_final_leaf_replicate_1__adapters_trimmed.sam'
-    ill_sites = '../test/filtered_splice_sites_with_orientation.tsv'
-    common_outdir = './'
-    change_to_correct_splice_sites(sam_file, ill_sites, num_threads, common_outdir)

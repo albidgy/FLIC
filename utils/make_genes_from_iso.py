@@ -50,7 +50,7 @@ def calc_similaritivity(l_of_borders):
             max_start = max(l_of_borders[idx][0], l_of_borders[jdx][0])
             min_end = min(l_of_borders[idx][1], l_of_borders[jdx][1])
             min_length = min(l_of_borders[idx][1] - l_of_borders[idx][0],
-                                  l_of_borders[jdx][1] - l_of_borders[jdx][0])
+                             l_of_borders[jdx][1] - l_of_borders[jdx][0])
 
             prop_intersection = max(min_end - max_start, 0) / min_length
             l_of_pair_similaritivity.append((l_of_borders[idx], l_of_borders[jdx], round(prop_intersection, 2)))
@@ -58,13 +58,13 @@ def calc_similaritivity(l_of_borders):
 
 
 def create_graph(l_of_borders, l_of_pair_similaritivity):
-    G = nx.Graph()
-    G.add_nodes_from(l_of_borders)
-    G.add_weighted_edges_from(l_of_pair_similaritivity)
-    bad_scores = list(filter(lambda e: e[2] < 0.8, (e for e in G.edges.data('weight'))))
+    graph = nx.Graph()
+    graph.add_nodes_from(l_of_borders)
+    graph.add_weighted_edges_from(l_of_pair_similaritivity)
+    bad_scores = list(filter(lambda e: e[2] < 0.8, (e for e in graph.edges.data('weight'))))
     bad_ids = list(e[:2] for e in bad_scores)
-    G.remove_edges_from(bad_ids)
-    return G
+    graph.remove_edges_from(bad_ids)
+    return graph
 
 
 def extract_longest_completted_subgraphs(graph):
@@ -172,7 +172,6 @@ def create_genes(iso_dir, num_threads, thr_1st, thr_2nd, output_dir):
     d_border_iso_with_splice_sites = make_d_borders_by_iso(d_good_iso)
     data_by_proc = prepare_data_for_multiprocessing(d_border_iso_with_splice_sites, num_threads)
 
-    # num_threads += 1
     _ = Parallel(n_jobs=num_threads)(delayed(make_genes)(pid, d_border_iso_splitted, tmp_outdir + out_filename)
                                      for pid, d_border_iso_splitted in data_by_proc.items())
     concate_genes(f'{genes_dir}{out_filename}.tsv', tmp_outdir)
@@ -236,5 +235,4 @@ def move_geneids_from_annot(annot_file, genes_file, out_dir):
             with open(out_fname, 'a') as ouf:
                 ouf.write('\t'.join(line_l) + '\n')
 
-    # os.remove(genes_file)
     return out_fname

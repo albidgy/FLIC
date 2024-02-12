@@ -1,5 +1,4 @@
 import os
-import shutil
 from collections import defaultdict
 
 
@@ -34,9 +33,6 @@ def make_isoforms(splice_sites_file, d_starts, d_poly_a):
         for line in inf:
             line_l = line.strip('\n').split('\t')
             chrom = line_l[1]
-            if chrom in ['NC_037304.1', 'NC_000932.1']:  # TODO: remove it later
-                continue
-
             orientation = line_l[2]
             start = int(line_l[3])
             stop = int(line_l[4])
@@ -152,8 +148,3 @@ def move_isoids_from_genes(iso_dir, genes_file, thr_1st, thr_2nd, out_dir):
             with open(ouf_name, 'a') as ouf:
                 ouf.write('\t'.join(iso_l) + '\n')
     return ouf_name
-    # shutil.rmtree(iso_dir)
-
-
-if __name__ == '__main__':
-    move_isoids_from_genes('../test/isoforms/', '../test/final_results/genes.tsv', 1, 5, '../test/')

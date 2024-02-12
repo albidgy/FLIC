@@ -146,11 +146,3 @@ def extract_fasta(fasta_file, final_fpath_genes, final_fpath_iso, common_out_dir
     d_of_gene_seqs, d_of_gene_coords = extract_gene_seqs(final_fpath_genes, d_of_fasta, out_dir)
     d_of_transcripts = extract_transcripts_seq(final_fpath_iso, d_of_gene_coords, d_of_fasta, out_dir)
     make_pseudoalignments(d_of_gene_seqs, d_of_transcripts, out_dir)
-
-
-# if __name__ == '__main__':
-#     fasta_file = '../../dev_pipeline_splicing/data/genome/tair10_1/GCF_000001735.4_TAIR10.1_genomic.fna'
-#     final_fpath_genes = 'final_results/genes.tsv'
-#     final_fpath_iso = 'final_results/isoforms.tsv'
-#     common_out_dir = './'
-#     extract_fasta(fasta_file, final_fpath_genes, final_fpath_iso, common_out_dir)

@@ -41,14 +41,10 @@ def bam2bedgraph(path_to_cutted_bams, peaks_dir):
 def run_split_bedgraph(file_bedgraph, peaks_dir):
     output_name = peaks_dir + os.path.basename(file_bedgraph)
     l_lines = []
-    # with open(output_name, 'w') as ouf:
-    #     ouf.write('')
 
     with open(file_bedgraph) as bedgraph:
         for line in bedgraph:
             chrom, start, stop, cov = line.strip('\n').split('\t')
-            if chrom in ['NC_037304.1', 'NC_000932.1']:  # TODO: remove it later
-                continue
             start = int(start)
             stop = int(stop)
             while start < stop:
@@ -136,9 +132,3 @@ def find_starts_polya(bam_dir, ref_fasta, common_outdir):
     path_to_cagefightr_res = run_cagefightr(path_to_bigwig, file_chr_length, peaks_dir)
     path_to_filt_cagefightr_res = filter_cagefightr(path_to_cagefightr_res, peaks_dir)
     return path_to_filt_cagefightr_res
-
-
-# if __name__ == '__main__':
-#     find_starts_polya('/mnt/nvme/a_kasianova/solanum_splicing/pipeline/solanum_merged/sorted_bams/',
-#                       '/mnt/nvme/a_kasianova/solanum_splicing/data/genome/Solanum_lycopersicum.SL3.0.dna_sm.toplevel.fa',
-#                       './')

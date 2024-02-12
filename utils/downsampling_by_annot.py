@@ -1,5 +1,4 @@
 import concurrent.futures
-import sys
 
 import numpy as np
 import os
@@ -115,23 +114,16 @@ def check_intersection_with_gene(read_coords, genes_coords):
 
 def make_sampling(pid, d_of_gene_reads_cov, tmp_outdir, max_n_reads, min_n_reads):
     s_downsampled_reads = []
-    # n_sampled_genes = 0  # TODO: REMOVE IT
-    # n_unsampled_genes = 0  # TODO: REMOVE IT
     for key, val in d_of_gene_reads_cov.items():
         if len(val) < min_n_reads:
             continue
         elif len(val) <= max_n_reads:
             s_downsampled_reads.extend(val)
-            # n_unsampled_genes += 1  # TODO: REMOVE IT
         else:
             s_downsampled_reads.extend(np.random.choice(val, max_n_reads, replace=False))
-            # n_sampled_genes += 1  # TODO: REMOVE IT
 
     with open(f'{tmp_outdir}{str(pid)}.txt', 'w') as ouf:
         ouf.write('\n'.join(s_downsampled_reads) + '\n')
-    # print(str(pid) + ':')  # TODO: REMOVE IT
-    # print('downsampled genes - ' + str(n_sampled_genes))  # TODO: REMOVE IT
-    # print('unsampled genes - ' + str(n_unsampled_genes))  # TODO: REMOVE IT
 
 
 def get_sampled_read_names(pid, sam_file, d_of_gene_coords, d_of_genes, tmp_outdir, max_n_reads, min_n_reads):
@@ -158,9 +150,6 @@ def get_sampled_read_names(pid, sam_file, d_of_gene_coords, d_of_genes, tmp_outd
                 if gene_broads is not None:
                     d_of_gene_reads_cov[d_of_genes[chrom_and_strand][gene_broads]].append(read_id)
 
-    with open(f'/mnt/nvme/a_kasianova/splicing_pipeline/make_stats/n_reads_before_downsampling/{str(pid)}.tsv', 'w') as ouf:  # TODO: REMOVE IT
-        for key, val in d_of_gene_reads_cov.items():  # TODO: REMOVE IT
-            ouf.write(f'{key}\t{str(len(val))}\n')  # TODO: REMOVE IT
     make_sampling(pid, d_of_gene_reads_cov, tmp_outdir, max_n_reads, min_n_reads)
 
 
@@ -200,26 +189,26 @@ def filter_sam_file(uniq_sam, tmp_outdir):
                         ouf.write(line)
 
 
-def run_downsampling(sam_file, gtf_file, num_threads, max_n_reads, min_n_reads, common_outdir):
+def run_downsampling(need_make_downsampling, sam_file, gtf_file, num_threads, max_n_reads, min_n_reads, common_outdir):
     downsampling_outdir = common_outdir + 'downsampled/'
     if not os.path.exists(downsampling_outdir):
         os.mkdir(downsampling_outdir)
-    tmp_outdir = downsampling_outdir + 'tmp/'
-    os.mkdir(tmp_outdir)
 
     d_of_gene_coords, d_of_genes = read_annot_file(gtf_file)
     with concurrent.futures.ProcessPoolExecutor(max_workers=1) as executor:  # need for clearing memory
         uniq_map_sam = executor.submit(drop_multimapping_reads, sam_file, downsampling_outdir,).result()
 
-    d_of_gene_coords_by_proc, d_of_genes_by_proc = prepare_data_for_multiprocessing(d_of_gene_coords,
-                                                                                    d_of_genes, num_threads)
-    # num_threads += 1
-    _ = Parallel(n_jobs=num_threads)(delayed(get_sampled_read_names)(pid, uniq_map_sam,
-                                                                     d_of_gene_coords_by_proc[pid],
-                                                                     d_of_genes_by_proc[pid], tmp_outdir,
-                                                                     max_n_reads, min_n_reads)
-                                     for pid in d_of_gene_coords_by_proc.keys())
+    if need_make_downsampling:
+        tmp_outdir = downsampling_outdir + 'tmp/'
+        os.mkdir(tmp_outdir)
+        d_of_gene_coords_by_proc, d_of_genes_by_proc = prepare_data_for_multiprocessing(d_of_gene_coords,
+                                                                                        d_of_genes, num_threads)
+        _ = Parallel(n_jobs=num_threads)(delayed(get_sampled_read_names)(pid, uniq_map_sam,
+                                                                         d_of_gene_coords_by_proc[pid],
+                                                                         d_of_genes_by_proc[pid], tmp_outdir,
+                                                                         max_n_reads, min_n_reads)
+                                         for pid in d_of_gene_coords_by_proc.keys())
 
-    filter_sam_file(f'{uniq_map_sam}', tmp_outdir)
-    shutil.rmtree(tmp_outdir)
+        filter_sam_file(f'{uniq_map_sam}', tmp_outdir)
+        shutil.rmtree(tmp_outdir)
     return downsampling_outdir, uniq_map_sam
