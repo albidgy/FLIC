@@ -26,8 +26,8 @@ def parser_arguments():
                               )
     general_args.add_argument('-o',
                               '--output_dir',
-                              default='../res_splicing_' + datetime.now().strftime('%Y_%m_%d_%H_%M_%S') + '/',
-                              help='Output directory [default: ../res_splicing_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND]',
+                              default='./res_splicing_' + datetime.now().strftime('%Y_%m_%d_%H_%M_%S') + '/',
+                              help='Output directory [default: ./res_splicing_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND]',
                               )
     general_args.add_argument('--trim_long_reads',
                               default=False,
@@ -48,7 +48,7 @@ def parser_arguments():
                               default=False,
                               action='store_true',
                               help='Perform additional filtering of final isoforms based on expression '
-                                   'levels greater than or equal to 1% of total gene expression. '
+                                   'levels greater than or equal to 1%% of total gene expression. '
                                    'NOTE: gene boundaries will not be changed [default: False]',
                               )
     general_args.add_argument('-v', '--version',
