@@ -1,6 +1,7 @@
 import os
 from collections import defaultdict
 
+
 D_OF_COMPLEMENT = {'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G', 'N': 'N', '-': '-'}
 
 
@@ -107,10 +108,8 @@ def extract_transcripts_seq(file_isoform_coords, d_of_gene_coords, d_of_fasta, o
             transcript_seq = d_of_fasta[chrom][start:stop]
             correct_transcript_seq = change_introns_to_gap(transcript_seq, splice_sites, start)
             # add 5'- and 3'-gaps
-            correct_transcript_seq = (['-'] * compare_starts_ends(start, d_of_gene_coords[gene_id][
-                0])) + correct_transcript_seq
-            correct_transcript_seq = correct_transcript_seq + (
-                    ['-'] * compare_starts_ends(stop, d_of_gene_coords[gene_id][1]))
+            correct_transcript_seq = (['-'] * compare_starts_ends(start, d_of_gene_coords[gene_id][0])) + correct_transcript_seq
+            correct_transcript_seq = correct_transcript_seq + (['-'] * compare_starts_ends(stop, d_of_gene_coords[gene_id][1]))
 
             if orientation == '-':
                 correct_transcript_seq = complement(correct_transcript_seq)

@@ -197,7 +197,7 @@ def read_annot_file(annot_file):
     return d_of_annot_genes
 
 
-def intersection_with_genes(gene_coords, d_of_ref):
+def intersection_with_genes(gene_coords, d_of_ref, counter_unassigned_genes):
     start_gene, stop_gene = gene_coords
 
     for key, gene_id in d_of_ref.items():
@@ -211,10 +211,11 @@ def intersection_with_genes(gene_coords, d_of_ref):
 
         if prop_intersection >= 0.8:
             return gene_id
-    return 'unassigned_gene'
+    return f'unassigned_gene_{str(counter_unassigned_genes)}'
 
 
 def move_geneids_from_annot(annot_file, genes_file, out_dir):
+    counter_unassigned_genes = 1
     out_fname = f'{out_dir}final_results/{os.path.basename(genes_file)}'
     os.mkdir(f'{out_dir}final_results/')
 
@@ -229,8 +230,11 @@ def move_geneids_from_annot(annot_file, genes_file, out_dir):
             start = int(line_l[2])
             stop = int(line_l[4])
 
-            gene_id = intersection_with_genes((start, stop), d_annot_file[chrom_and_orientation])
+            gene_id = intersection_with_genes((start, stop), d_annot_file[chrom_and_orientation],
+                                              counter_unassigned_genes)
             line_l.append(gene_id)
+            if gene_id.startswith('unassigned_gene_'):
+                counter_unassigned_genes += 1
 
             with open(out_fname, 'a') as ouf:
                 ouf.write('\t'.join(line_l) + '\n')

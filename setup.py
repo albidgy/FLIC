@@ -7,7 +7,7 @@ setup(
     author='Alexandra Kasianova',
     author_email='Alexandra.Kasianova@skoltech.ru',
     url='https://github.com/albidgy/FLIC',
-    description='A tool for reconstruction of splicing isoform from transcription start site to polyA site',
+    description='A tool for isoform reconstruction based on long reads',
     license='MIT',
     install_requires=['joblib', 'networkx', 'numpy'],
     packages=['flic_src', 'flic_src/modules', 'flic_src/scripts'],
