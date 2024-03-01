@@ -60,7 +60,7 @@ def write_res(ouf_name, s_good_iso):
 
 
 def filter_by_1percent(iso_dir, iso_thr1, iso_thr2, final_iso_file, out_dir):
-    ouf_name = f'{out_dir}final_results/filt_1perc_{os.path.basename(final_iso_file)}'
+    ouf_name = f'{out_dir}filt_1perc_{os.path.basename(final_iso_file)}'
     iso_expr = read_isoform_files(iso_dir, iso_thr2, iso_thr1)
     d_of_iso_with_gene_ids = read_filt_iso_file(final_iso_file)
     expr_by_genes = calc_expr_by_genes(iso_expr, d_of_iso_with_gene_ids)

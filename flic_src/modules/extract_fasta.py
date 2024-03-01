@@ -138,8 +138,7 @@ def make_pseudoalignments(d_of_gene_seqs, d_of_transcripts, out_dir):
                 ouf.write(''.join(transcript_seq) + '\n')
 
 
-def extract_fasta(fasta_file, final_fpath_genes, final_fpath_iso, common_out_dir):
-    out_dir = common_out_dir + 'final_results/'
+def extract_fasta(fasta_file, final_fpath_genes, final_fpath_iso, out_dir):
     d_of_fasta = read_fasta(fasta_file)
     d_of_gene_seqs, d_of_gene_coords = extract_gene_seqs(final_fpath_genes, d_of_fasta, out_dir)
     d_of_transcripts = extract_transcripts_seq(final_fpath_iso, d_of_gene_coords, d_of_fasta, out_dir)

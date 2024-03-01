@@ -122,7 +122,7 @@ def intersection_with_genes(iso_coords, d_of_ref):
 def move_isoids_from_genes(iso_dir, genes_file, thr_1st, thr_2nd, out_dir):
     l_of_iso = read_isoform_files(iso_dir, thr_1st, thr_2nd)
     d_of_genes = read_genes_file(genes_file)
-    ouf_name = f'{out_dir}final_results/isoforms.tsv'
+    ouf_name = f'{out_dir}isoforms.tsv'
 
     d_of_iso_by_genes = defaultdict(list)
     with open(ouf_name, 'w') as ouf:
