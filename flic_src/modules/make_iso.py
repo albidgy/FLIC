@@ -59,7 +59,7 @@ def make_isoforms(splice_sites_file, d_starts, d_poly_a):
 def filter_iso_by_thr(d_of_isoforms, out_filename):
     with open(out_filename, 'w') as ouf:
         for key, val in d_of_isoforms.items():
-                ouf.write(f'{key}\t{str(val)}\n')
+            ouf.write(f'{key}\t{str(val)}\n')
 
 
 def create_isoforms(filt_cagefightr_dir, changed_splice_sites_dir, changed_splice_file, common_outdir):

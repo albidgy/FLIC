@@ -1,6 +1,6 @@
 import os
 
-from scripts import option_parser, external_tool_runner
+from flic_src.scripts import external_tool_runner
 
 
 D_FOR_BEDTOOLS = {('5', '+'): 'start_fwd', ('5', '-'): 'start_rev',
@@ -31,9 +31,9 @@ def bam2bedgraph(path_to_cutted_bams, peaks_dir):
     os.mkdir(output_dirname)
 
     for file in os.listdir(path_to_cutted_bams):
-        out_fname = file.split('.bam')[0] + '.bedgraph'
+        out_fname = file.replace('.bam', '.bedgraph')
         for key, val in D_FOR_BEDTOOLS.items():
-            cmd_bam2bedgraph = f'{option_parser.fpath_bedtools} genomecov -ibam {path_to_cutted_bams}{file} -{key[0]} -strand {key[1]} -bg > {output_dirname}{val}_{out_fname}'
+            cmd_bam2bedgraph = f'bedtools genomecov -ibam {path_to_cutted_bams}{file} -{key[0]} -strand {key[1]} -bg > {output_dirname}{val}_{out_fname}'
             external_tool_runner.run_external_tool(cmd_bam2bedgraph, f"{os.path.split(peaks_dir[:-1])[0]}/")
     return output_dirname
 
@@ -71,7 +71,7 @@ def bedgraph2bigwig(path_to_corrected_bedgraph, file_chr_length, peaks_dir):
 
     for file in os.listdir(path_to_corrected_bedgraph):
         out_fname = file.split('.bedgraph')[0] + '.bw'
-        cmd_bedgraph2biwig = f'{option_parser.fpath_bedgraph2bigwig} {path_to_corrected_bedgraph}{file} {file_chr_length} {output_dirname}{out_fname}'
+        cmd_bedgraph2biwig = f'bedGraphToBigWig {path_to_corrected_bedgraph}{file} {file_chr_length} {output_dirname}{out_fname}'
         external_tool_runner.run_external_tool(cmd_bedgraph2biwig, f"{os.path.split(peaks_dir[:-1])[0]}/")
     return output_dirname
 
@@ -131,4 +131,6 @@ def find_starts_polya(bam_dir, ref_fasta, common_outdir):
     path_to_bigwig = bedgraph2bigwig(path_to_corrected_bedgraph, file_chr_length, peaks_dir)
     path_to_cagefightr_res = run_cagefightr(path_to_bigwig, file_chr_length, peaks_dir)
     path_to_filt_cagefightr_res = filter_cagefightr(path_to_cagefightr_res, peaks_dir)
+    os.remove(f'{common_outdir}ref_chr_length.txt')
+
     return path_to_filt_cagefightr_res

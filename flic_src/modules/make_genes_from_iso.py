@@ -1,9 +1,9 @@
-import networkx as nx
 import os
 import re
 import shutil
-
 from collections import defaultdict
+
+import networkx as nx
 from joblib import Parallel, delayed
 
 

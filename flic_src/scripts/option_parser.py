@@ -44,6 +44,17 @@ def parser_arguments():
                               action='store_true',
                               help='Make a downsampling long reads by given threshold [default: False]',
                               )
+    general_args.add_argument('--extra_filter_iso',
+                              default=False,
+                              action='store_true',
+                              help='Perform additional filtering of final isoforms based on expression '
+                                   'levels greater than or equal to 1% of total gene expression. '
+                                   'NOTE: gene boundaries will not be changed [default: False]',
+                              )
+    general_args.add_argument('-v', '--version',
+                              action='version',
+                              version='FLIC v. 1.0',
+                              help='Show version of tool')
 
     optional_args = parser.add_argument_group(description='Optional arguments')
     optional_args.add_argument('--splice_sites',
@@ -61,22 +72,14 @@ def parser_arguments():
                                type=int,
                                help='Number of reads per gene remaining after downsampling [default: 1000]',
                                )
-    optional_args.add_argument('--iso_thr1',  # '--n_reads_per_iso_thr_2nd',
+    optional_args.add_argument('--iso_thr1',
                                default=5,
                                type=int,
                                help='Minimum number of reads forming an isoform at least in 1 replicate [default: 5]'
                                )
-    optional_args.add_argument('--iso_thr2',  # '--n_reads_per_iso_thr_1st',
+    optional_args.add_argument('--iso_thr2',
                                default=1,
                                type=int,
                                help='Minimum number of reads forming an isoform in another replicate [default: 1]'
                                )
     return parser.parse_args()
-
-
-fpath_porechop = 'porechop'
-fpath_cutadapt = 'cutadapt'
-fpath_minimap2 = 'minimap2'
-fpath_samtools = 'samtools'
-fpath_bedtools = 'bedtools'
-fpath_bedgraph2bigwig = 'bedGraphToBigWig'

@@ -1,7 +1,6 @@
 import os
 from collections import defaultdict
 
-
 D_OF_COMPLEMENT = {'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G', 'N': 'N', '-': '-'}
 
 
@@ -111,7 +110,7 @@ def extract_transcripts_seq(file_isoform_coords, d_of_gene_coords, d_of_fasta, o
             correct_transcript_seq = (['-'] * compare_starts_ends(start, d_of_gene_coords[gene_id][
                 0])) + correct_transcript_seq
             correct_transcript_seq = correct_transcript_seq + (
-                        ['-'] * compare_starts_ends(stop, d_of_gene_coords[gene_id][1]))
+                    ['-'] * compare_starts_ends(stop, d_of_gene_coords[gene_id][1]))
 
             if orientation == '-':
                 correct_transcript_seq = complement(correct_transcript_seq)

@@ -1,11 +1,10 @@
 import concurrent.futures
-
-import numpy as np
 import os
 import re
 import shutil
-
 from collections import defaultdict
+
+import numpy as np
 from joblib import Parallel, delayed
 
 D_OF_GOOD_FLAGS = {'0': '+', '16': '-'}
@@ -196,7 +195,7 @@ def run_downsampling(need_make_downsampling, sam_file, gtf_file, num_threads, ma
 
     d_of_gene_coords, d_of_genes = read_annot_file(gtf_file)
     with concurrent.futures.ProcessPoolExecutor(max_workers=1) as executor:  # need for clearing memory
-        uniq_map_sam = executor.submit(drop_multimapping_reads, sam_file, downsampling_outdir,).result()
+        uniq_map_sam = executor.submit(drop_multimapping_reads, sam_file, downsampling_outdir, ).result()
 
     if need_make_downsampling:
         tmp_outdir = downsampling_outdir + 'tmp/'
