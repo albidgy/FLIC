@@ -8,7 +8,7 @@ def get_d_starts_or_poly_a(file):
         for line in starts:
             line_l = line.strip('\n').split('\t')
             chrom_and_orientation = f'{line_l[0]}*{line_l[1]}'
-            start_coord = int(line_l[2])
+            start_coord = int(line_l[2]) + 1  # convert 0-based to 1-based
             end_coord = int(line_l[3])
 
             if chrom_and_orientation not in d_starts_or_poly_a.keys():
@@ -22,7 +22,6 @@ def get_d_starts_or_poly_a(file):
 def find_start_stop_for_read(d_cur_chrom_and_orientation, coordinate):
     if coordinate in d_cur_chrom_and_orientation.keys():
         start, stop = d_cur_chrom_and_orientation[coordinate]
-        start += 1  # convert 0-based to 1-based
         return f'{start}-{stop}'
     return None
 

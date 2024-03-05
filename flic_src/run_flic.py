@@ -21,7 +21,7 @@ def run_tool():
     dirs_for_delete = []
 
     for long_reads in l_of_ont_reads:
-        cur_file_location = os.path.dirname(long_reads) + '/'
+        cur_file_location = os.path.abspath(os.path.dirname(long_reads)) + '/'
         long_reads = os.path.basename(long_reads)
 
         if arguments.trim_long_reads:

@@ -33,12 +33,13 @@ To install this programs in separate conda environment ```flic_env```, run the _
 bash create_flic_env.sh
 ```
 
-The installation of the R package __CAGEfightR__ is also required. For more details see [link](https://bioconductor.org/packages/release/bioc/html/CAGEfightR.html).
+The installation of the R [CAGEfightR](https://bioconductor.org/packages/release/bioc/html/CAGEfightR.html) and [argparse](https://cran.r-project.org/web/packages/argparse/index.html) packages is also required.
 ```R
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
-
 BiocManager::install("CAGEfightR")
+
+install.packages("argparse")
 ```
 
 Next install FLIC using pip:
