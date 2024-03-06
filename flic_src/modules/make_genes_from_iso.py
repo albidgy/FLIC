@@ -217,7 +217,6 @@ def intersection_with_genes(gene_coords, d_of_ref, counter_unassigned_genes):
 def move_geneids_from_annot(annot_file, genes_file, out_dir):
     counter_unassigned_genes = 1
     out_fname = f'{out_dir}{os.path.basename(genes_file)}'
-    os.mkdir(f'{out_dir}')
 
     d_annot_file = read_annot_file(annot_file)
     with open(out_fname, 'w') as ouf:
