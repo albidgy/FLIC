@@ -14,7 +14,7 @@ def make_fasta_chr_len(ref_fasta, ouf_dir):
     with open(ref_fasta) as inf:
         for line in inf:
             if line.startswith('>'):
-                chrom = line.split(' ')[0][1:]
+                chrom = line.strip('\n').split(' ')[0][1:]
                 d_of_chr_len[chrom] = 0
             else:
                 n_nucls = len(line.strip('\n'))

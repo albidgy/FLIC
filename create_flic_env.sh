@@ -5,7 +5,7 @@ conda create -y -n flic_env python=3.10
 conda activate flic_env
 
 ## Install required python and conda packages ##
-pip install cutadapt
+pip3 install cutadapt
 
 conda install -y -c conda-forge libstdcxx-ng  # need for install correct version of porechop
 conda install -y -c conda-forge python_abi=3.10  # need for install correct version of porechop

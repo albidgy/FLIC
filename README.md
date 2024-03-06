@@ -72,7 +72,7 @@ flic [OPTIONS] --long_reads /path/to/ont_rep1.fastq,/path/to/ont_rep2.fastq \
                     
 -t / --threads            Number of threads [default: 1]
 
--o / --output_dir         Output directory [default: ../res_splicing_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND]
+-o / --output_dir         Output directory [default: ./res_flic_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND]
 
 --trim_long_reads         Add trimming long reads step by using Porechop tool
 

@@ -65,6 +65,7 @@ def run_tool():
     cagefightr_res_dir = find_start_polya.find_starts_polya(bam_dir, arguments.ref_fasta,
                                                             arguments.output_dir)
     dirs_for_delete.append(os.path.split(os.path.abspath(cagefightr_res_dir))[0])
+    print(dirs_for_delete)
 
     for changed_splice_file in os.listdir(changed_splice_sites_dir):
         iso_dir = make_iso.create_isoforms(cagefightr_res_dir, changed_splice_sites_dir,
