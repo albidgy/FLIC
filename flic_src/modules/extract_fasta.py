@@ -20,7 +20,7 @@ def read_fasta(fasta_file):
     with open(fasta_file) as fasta:
         for line in fasta:
             if line.startswith('>'):
-                chrom = line.split(' ')[0][1:]
+                chrom = line.strip('\n').split(' ')[0][1:]
                 d_of_fasta[chrom] = []
             else:
                 line_l = list(line.strip('\n').upper())

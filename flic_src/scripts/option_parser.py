@@ -26,7 +26,7 @@ def parser_arguments():
                               )
     general_args.add_argument('-o',
                               '--output_dir',
-                              default='./res_splicing_' + datetime.now().strftime('%Y_%m_%d_%H_%M_%S') + '/',
+                              default='./res_flic_' + datetime.now().strftime('%Y_%m_%d_%H_%M_%S') + '/',
                               help='Output directory [default: ./res_flic_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND]',
                               )
     general_args.add_argument('--trim_long_reads',
