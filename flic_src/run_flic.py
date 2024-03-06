@@ -38,7 +38,7 @@ def run_tool():
                                                       arguments.output_dir, arguments.threads)
         dirs_for_delete.append(cur_file_location)
 
-        long_reads = long_reads.replace('.fastq', '.sam')
+        long_reads = long_reads.split('.fastq')[0] + '.sam'
         cur_file_location, uniq_map_sam = downsampling_by_annot.run_downsampling(arguments.make_downsampling,
                                                                                  f'{cur_file_location}{long_reads}',
                                                                                  arguments.ref_annot,

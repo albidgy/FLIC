@@ -26,7 +26,7 @@ def run_minimap2(long_reads, ref_fasta, common_outdir, num_threads):
     minimap2_outdir = common_outdir + 'minimap2_output/'
     if not os.path.exists(minimap2_outdir):
         os.mkdir(minimap2_outdir)
-    cmd_minimap2 = f"minimap2 -ax splice -k14 -uf -t {num_threads} -G 10k {ref_fasta} {long_reads} > {minimap2_outdir}{os.path.basename(long_reads).replace('.fastq', '.sam')}"
+    cmd_minimap2 = f"minimap2 -ax splice -k14 -uf -t {num_threads} -G 10k {ref_fasta} {long_reads} > {minimap2_outdir}{os.path.basename(long_reads).split('.fastq')[0]}.sam'"
     external_tool_runner.run_external_tool(cmd_minimap2, common_outdir)
     return minimap2_outdir
 
