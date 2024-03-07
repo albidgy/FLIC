@@ -1,4 +1,5 @@
 import concurrent.futures
+import logging
 import os
 import re
 import shutil
@@ -189,6 +190,7 @@ def filter_sam_file(uniq_sam, tmp_outdir):
 
 
 def run_downsampling(need_make_downsampling, sam_file, gtf_file, num_threads, max_n_reads, min_n_reads, common_outdir):
+    logging.info(f'    Downsample reads by max threshold {str(max_n_reads)} reads per gene')
     downsampling_outdir = common_outdir + 'downsampled/'
     if not os.path.exists(downsampling_outdir):
         os.mkdir(downsampling_outdir)

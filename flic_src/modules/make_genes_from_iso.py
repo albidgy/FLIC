@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 import shutil
@@ -162,6 +163,7 @@ def concate_genes(out_filename, path_to_tmp_dir):
 
 
 def create_genes(iso_dir, num_threads, thr_1st, thr_2nd, output_dir):
+    logging.info('Reconstruct genes from iso')
     genes_dir = output_dir + 'genes/'
     os.mkdir(genes_dir)
     tmp_outdir = genes_dir + 'tmp/'
@@ -215,6 +217,7 @@ def intersection_with_genes(gene_coords, d_of_ref, counter_unassigned_genes):
 
 
 def move_geneids_from_annot(annot_file, genes_file, out_dir):
+    logging.info('Add IDs for genes and isoforms')
     counter_unassigned_genes = 1
     out_fname = f'{out_dir}{os.path.basename(genes_file)}'
 

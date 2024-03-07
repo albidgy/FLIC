@@ -1,4 +1,5 @@
 import functools
+import logging
 import os
 
 from joblib import Parallel, delayed
@@ -164,6 +165,7 @@ def make_final_file(out_filename, merged_results):
 
 
 def change_to_correct_splice_sites(sam_file, ill_sites, num_threads, common_outdir):
+    logging.info('    Identify splice sites')
     changed_splice_sites_dir = common_outdir + 'changed_splice_sites/'
     if not os.path.exists(changed_splice_sites_dir):
         os.mkdir(changed_splice_sites_dir)

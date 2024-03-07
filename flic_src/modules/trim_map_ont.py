@@ -1,9 +1,11 @@
+import logging
 import os
 
 from flic_src.scripts import external_tool_runner
 
 
-def run_porechop(long_reads, common_outdir, num_threads):
+def run_porechop(long_reads, common_outdir, num_threads, ):
+    logging.info('    Trim long reads by using Porechop')
     porechop_outdir = common_outdir + 'porechop_output/'
     if not os.path.exists(porechop_outdir):
         os.mkdir(porechop_outdir)
@@ -13,6 +15,7 @@ def run_porechop(long_reads, common_outdir, num_threads):
 
 
 def run_cutadapt(long_reads, common_outdir, num_threads):
+    logging.info('    Cut adapters by using cutadapt')
     cutadapt_outdir = common_outdir + 'cutadapt_output/'
     if not os.path.exists(cutadapt_outdir):
         os.mkdir(cutadapt_outdir)
@@ -23,6 +26,7 @@ def run_cutadapt(long_reads, common_outdir, num_threads):
 
 
 def run_minimap2(long_reads, ref_fasta, common_outdir, num_threads):
+    logging.info('    Map long reads to reference by using minimap2')
     minimap2_outdir = common_outdir + 'minimap2_output/'
     if not os.path.exists(minimap2_outdir):
         os.mkdir(minimap2_outdir)
@@ -32,6 +36,7 @@ def run_minimap2(long_reads, ref_fasta, common_outdir, num_threads):
 
 
 def convert_sam2bam(sam_file, common_outdir, num_threads):
+    logging.info('    Convert sam to bam and sort them by using samtools\n')
     bam_outdir = common_outdir + 'sorted_bams/'
     if not os.path.exists(bam_outdir):
         os.mkdir(bam_outdir)

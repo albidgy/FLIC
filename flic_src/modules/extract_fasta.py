@@ -1,3 +1,4 @@
+import logging
 import os
 from collections import defaultdict
 
@@ -139,7 +140,9 @@ def make_pseudoalignments(d_of_gene_seqs, d_of_transcripts, out_dir):
 
 
 def extract_fasta(fasta_file, final_fpath_genes, final_fpath_iso, out_dir):
+    logging.info('Extract sequences of genes and isoforms')
     d_of_fasta = read_fasta(fasta_file)
     d_of_gene_seqs, d_of_gene_coords = extract_gene_seqs(final_fpath_genes, d_of_fasta, out_dir)
     d_of_transcripts = extract_transcripts_seq(final_fpath_iso, d_of_gene_coords, d_of_fasta, out_dir)
+    logging.info('Create pseudoalignments')
     make_pseudoalignments(d_of_gene_seqs, d_of_transcripts, out_dir)

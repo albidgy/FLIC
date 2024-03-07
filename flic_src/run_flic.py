@@ -1,3 +1,4 @@
+import logging
 import os
 import shutil
 import sys
@@ -15,12 +16,20 @@ def run_tool():
     os.mkdir(arguments.output_dir)
     if arguments.output_dir[-1] != '/':
         arguments.output_dir = arguments.output_dir + '/'
+
     sys.stdout = Logger(arguments.output_dir)
+    logging.basicConfig(level=logging.INFO,
+                        format="%(levelname)s:  %(asctime)s  %(message)s",
+                        datefmt="%Y-%m-%d %H:%M:%S",
+                        handlers=[logging.FileHandler(f"{arguments.output_dir}FLIC.log"), logging.StreamHandler()])
+    logging.info('____Getting started FLIC____')
 
     l_of_ont_reads = arguments.long_reads.split(',')
     dirs_for_delete = set()
+    counter_files = 1
 
     for long_reads in l_of_ont_reads:
+        logging.info(f'  File {str(counter_files)}:')
         cur_file_location = os.path.abspath(os.path.dirname(long_reads)) + '/'
         long_reads = os.path.basename(long_reads)
 
@@ -61,11 +70,13 @@ def run_tool():
         bam_dir = trim_map_ont.convert_sam2bam(f"{cur_file_location}{sample_fname}",
                                                arguments.output_dir, arguments.threads)
         dirs_for_delete.add(bam_dir)
+        counter_files += 1
 
     cagefightr_res_dir = find_start_polya.find_starts_polya(bam_dir, arguments.ref_fasta,
                                                             arguments.output_dir)
     dirs_for_delete.add(os.path.split(os.path.abspath(cagefightr_res_dir))[0])
 
+    logging.info('Reconstruct isoforms')
     for changed_splice_file in os.listdir(changed_splice_sites_dir):
         iso_dir = make_iso.create_isoforms(cagefightr_res_dir, changed_splice_sites_dir,
                                            changed_splice_file, arguments.output_dir)
@@ -85,8 +96,10 @@ def run_tool():
         filter_by_1percent.filter_by_1percent(iso_dir, arguments.iso_thr1, arguments.iso_thr2,
                                               final_fpath_iso, arguments.output_dir)
 
+    logging.info('Clear intermediate dirs')
     for dir_name in dirs_for_delete:
         shutil.rmtree(dir_name)
+    logging.info('____FLIC finished successfully____')
 
 
 if __name__ == '__main__':

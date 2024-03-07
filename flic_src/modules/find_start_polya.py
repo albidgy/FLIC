@@ -1,3 +1,4 @@
+import logging
 import os
 
 from flic_src.scripts import external_tool_runner
@@ -121,14 +122,18 @@ def filter_cagefightr(path_to_cagefightr_dir, peaks_dir):
 
 
 def find_starts_polya(bam_dir, ref_fasta, common_outdir):
+    logging.info('Generate TSS and PolyA peaks:')
     peaks_dir = common_outdir + 'peak_calling/'
     if not os.path.exists(peaks_dir):
         os.mkdir(peaks_dir)
 
     file_chr_length = make_fasta_chr_len(ref_fasta, common_outdir)
+    logging.info('    Convert bam to bedgraph by using bedtools')
     path_to_bedgraph = bam2bedgraph(bam_dir, peaks_dir)
     path_to_corrected_bedgraph = make_correct_bedgraph(path_to_bedgraph, peaks_dir)
+    logging.info('    Convert bedgraph to bigwig by using BedGraphToBigWig')
     path_to_bigwig = bedgraph2bigwig(path_to_corrected_bedgraph, file_chr_length, peaks_dir)
+    logging.info('    Call peaks by using CAGEfightR')
     path_to_cagefightr_res = run_cagefightr(path_to_bigwig, file_chr_length, peaks_dir)
     path_to_filt_cagefightr_res = filter_cagefightr(path_to_cagefightr_res, peaks_dir)
     os.remove(f'{common_outdir}ref_chr_length.txt')
