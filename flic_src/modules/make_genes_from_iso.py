@@ -163,7 +163,7 @@ def concate_genes(out_filename, path_to_tmp_dir):
 
 
 def create_genes(iso_dir, num_threads, thr_1st, thr_2nd, output_dir):
-    logging.info('Reconstruct genes from iso')
+    logging.info('Reconstruct genes from isoforms')
     genes_dir = output_dir + 'genes/'
     os.mkdir(genes_dir)
     tmp_outdir = genes_dir + 'tmp/'
