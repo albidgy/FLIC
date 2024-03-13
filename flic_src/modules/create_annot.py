@@ -22,13 +22,8 @@ def read_iso_file(isoform_fpath):
     with open(isoform_fpath) as inf:
         for line in inf:
             line_l = line.strip('\n').split('\t')
-            orientation = line_l[1]
-            if orientation == '+':
-                start = int(line_l[2].split('-')[0])
-                end = int(line_l[4].split('-')[1])
-            else:
-                start = int(line_l[4].split('-')[0])
-                end = int(line_l[2].split('-')[1])
+            start = int(line_l[2].split('-')[0])
+            end = int(line_l[4].split('-')[1])
 
             splice_sites = line_l[3]
             transcript_id = line_l[-1]
@@ -95,10 +90,7 @@ def create_gtf_file(isoform_fpath, genes_fpath, out_dir, version):
                 ouf.write(res_line)
 
                 exon_counter = 1
-                if orientation == '+':
-                    exons_l = get_exons_l(splice_sites, transcript_start, transcript_end)
-                else:
-                    exons_l = get_exons_l(splice_sites, transcript_end, transcript_start)
+                exons_l = get_exons_l(splice_sites, transcript_start, transcript_end)
                 for cur_exon in exons_l:
                     res_line = fill_annot_template(chrom, 'exon', cur_exon[0],
                                                    cur_exon[1], orientation, gene_id,
