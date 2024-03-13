@@ -4,7 +4,7 @@ import shutil
 import sys
 
 from flic_src.modules import make_iso, trim_map_ont, extract_fasta, downsampling_by_annot, find_start_polya, \
-    make_correct_splice_sites, make_genes_from_iso, filter_by_1percent
+    make_correct_splice_sites, make_genes_from_iso, filter_by_1percent, create_annot
 from flic_src.scripts.external_tool_runner import Logger
 from flic_src.scripts import option_parser
 
@@ -91,6 +91,7 @@ def run_tool():
     final_fpath_iso = make_iso.move_isoids_from_genes(iso_dir, final_fpath_genes, arguments.iso_thr2,
                                                       arguments.iso_thr1, arguments.output_dir)
     extract_fasta.extract_fasta(arguments.ref_fasta, final_fpath_genes, final_fpath_iso, arguments.output_dir)
+    create_annot.create_gtf_file(final_fpath_iso, final_fpath_genes, arguments.output_dir)
 
     if arguments.extra_filter_iso:
         filter_by_1percent.filter_by_1percent(iso_dir, arguments.iso_thr1, arguments.iso_thr2,
