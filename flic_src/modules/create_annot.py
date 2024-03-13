@@ -95,7 +95,10 @@ def create_gtf_file(isoform_fpath, genes_fpath, out_dir, version):
                 ouf.write(res_line)
 
                 exon_counter = 1
-                exons_l = get_exons_l(splice_sites, transcript_start, transcript_end)
+                if orientation == '+':
+                    exons_l = get_exons_l(splice_sites, transcript_start, transcript_end)
+                else:
+                    exons_l = get_exons_l(splice_sites, transcript_end, transcript_start)
                 for cur_exon in exons_l:
                     res_line = fill_annot_template(chrom, 'exon', cur_exon[0],
                                                    cur_exon[1], orientation, gene_id,
