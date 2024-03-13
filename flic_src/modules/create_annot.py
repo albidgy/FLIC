@@ -75,12 +75,13 @@ def fill_annot_template(chrom, feat_type, start, end, orientation,
     return f'{chrom}\t{tool}\t{feat_type}\t{str(start)}\t{str(end)}\t.\t{orientation}\t.\t{comment_line}\n'
 
 
-def create_gtf_file(isoform_fpath, genes_fpath, out_dir):
+def create_gtf_file(isoform_fpath, genes_fpath, out_dir, version):
     logging.info('Create annotation GTF format file')
     d_genes = read_genes_file(genes_fpath)
     d_iso_comb_by_genes = read_iso_file(isoform_fpath)
 
     with open(f'{out_dir}annotation.gtf', 'w') as ouf:
+        ouf.write(f'#{version} created GTF\n')
         for gene_id in d_genes.keys():
             chrom, gene_start, gene_end, orientation = d_genes[gene_id]
             res_line = fill_annot_template(chrom, 'gene', gene_start,
