@@ -2,6 +2,9 @@ import argparse
 from datetime import datetime
 
 
+VERSION = 'v. 1.0'
+
+
 def parser_arguments():
     parser = argparse.ArgumentParser(description='FLIC: tool for isoform reconstruction based on long reads')
     general_args = parser.add_argument_group(description='General arguments')
@@ -53,7 +56,7 @@ def parser_arguments():
                               )
     general_args.add_argument('-v', '--version',
                               action='version',
-                              version='FLIC v. 1.0',
+                              version=f'FLIC {VERSION}',
                               help='Show version of tool')
 
     optional_args = parser.add_argument_group(description='Optional arguments')

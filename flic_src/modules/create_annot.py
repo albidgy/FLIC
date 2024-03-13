@@ -81,7 +81,7 @@ def create_gtf_file(isoform_fpath, genes_fpath, out_dir, version):
     d_iso_comb_by_genes = read_iso_file(isoform_fpath)
 
     with open(f'{out_dir}annotation.gtf', 'w') as ouf:
-        ouf.write(f'#{version} created GTF\n')
+        ouf.write(f'#FLIC {version} created GTF\n')
         for gene_id in d_genes.keys():
             chrom, gene_start, gene_end, orientation = d_genes[gene_id]
             res_line = fill_annot_template(chrom, 'gene', gene_start,
