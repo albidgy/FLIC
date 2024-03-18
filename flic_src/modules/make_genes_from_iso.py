@@ -37,9 +37,13 @@ def make_d_borders_by_iso(d_of_isoforms):
         if splice_sites == ['']:
             splice_sites = []
 
+        split_by_starts_mln = start // 1_000_000
         if chrom_and_orientation not in d_border_iso_with_splice_sites.keys():
             d_border_iso_with_splice_sites[chrom_and_orientation] = {}
-        d_border_iso_with_splice_sites[chrom_and_orientation][(start, stop)] = splice_sites
+        if split_by_starts_mln not in d_border_iso_with_splice_sites[chrom_and_orientation].keys():
+            d_border_iso_with_splice_sites[chrom_and_orientation][split_by_starts_mln] = {}
+        d_border_iso_with_splice_sites[chrom_and_orientation][split_by_starts_mln][(start, stop)] = splice_sites
+
     return d_border_iso_with_splice_sites
 
 
@@ -129,14 +133,23 @@ def write_genes(d_of_gene_borders, chrom_and_orientation, output_name):
 
 def make_genes(pid, d_border_iso_with_splice_sites, ouf_filename):
     out_filename = f'{ouf_filename}_{str(pid)}.tsv'
-    for key, val in d_border_iso_with_splice_sites.items():
-        prev_l_of_borders = []
-        d_cur_borders = d_border_iso_with_splice_sites[key]
+    for chrom_and_orientation, val in d_border_iso_with_splice_sites.items():
+        d_chrom_and_orientation_borders = {}
+        for split_by_mln in d_border_iso_with_splice_sites[chrom_and_orientation].keys():
+            prev_l_of_borders = []
+            d_cur_borders = d_border_iso_with_splice_sites[chrom_and_orientation][split_by_mln]
+            while prev_l_of_borders != list(d_cur_borders.keys()):
+                prev_l_of_borders = list(d_cur_borders.keys())
+                d_cur_borders = dict(sorted(run_clustering_by_graph(d_cur_borders).items()))
+            d_chrom_and_orientation_borders |= d_cur_borders
 
-        while prev_l_of_borders != list(d_cur_borders.keys()):
-            prev_l_of_borders = list(d_cur_borders.keys())
-            d_cur_borders = dict(sorted(run_clustering_by_graph(d_cur_borders).items()))
-        write_genes(d_cur_borders, key, out_filename)
+        prev_s_of_borders_common = []
+        d_cur_borders_common = d_chrom_and_orientation_borders
+        while prev_s_of_borders_common != list(d_cur_borders_common.keys()):
+            prev_s_of_borders_common = list(d_cur_borders_common.keys())
+            d_cur_borders_common = dict(sorted(run_clustering_by_graph(d_cur_borders_common).items()))
+
+        write_genes(d_cur_borders_common, chrom_and_orientation, out_filename)
 
 
 def prepare_data_for_multiprocessing(d_border_iso_with_splice_sites, n_proc):

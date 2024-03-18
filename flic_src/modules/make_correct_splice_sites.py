@@ -175,11 +175,11 @@ def change_to_correct_splice_sites(sam_file, ill_sites, num_threads, common_outd
     data_by_proc = prepare_data_for_multiprocessing(sam_lines, num_threads)
     if ill_sites:
         d_of_ill_sites = get_d_illumina_splice_sites(ill_sites)
-        results = Parallel(n_jobs=num_threads)(delayed(extract_splice_sites)(lines_l, d_of_ill_sites)
-                                               for lines_l in data_by_proc.values())
     else:
-        results = Parallel(n_jobs=num_threads)(delayed(extract_splice_sites)(lines_l, None)
-                                               for lines_l in data_by_proc.values())
+        d_of_ill_sites = None
+
+    results = Parallel(n_jobs=num_threads)(delayed(extract_splice_sites)(lines_l, d_of_ill_sites)
+                                           for lines_l in data_by_proc.values())
     merged_results = functools.reduce(lambda x, y: x.extend(y) or x, results)
     make_final_file(out_fname, merged_results)
     return changed_splice_sites_dir
