@@ -25,6 +25,13 @@ def run_tool():
     logging.info('____Getting started FLIC____')
 
     l_of_ont_reads = arguments.long_reads.split(',')
+    if len(l_of_ont_reads) <= 1:
+        print('Error: FLIC requires at least 2 repetitions of long reads as input data', file=sys.stderr)
+        sys.exit(1)
+    if arguments.ref_annot is not None and arguments.ref_annot.split('.')[-1] != 'gtf':
+        print('Error: FLIC can work only with annotations in GTF format', file=sys.stderr)
+        sys.exit(1)
+
     dirs_for_delete = set()
     counter_files = 1
 
@@ -47,7 +54,7 @@ def run_tool():
                                                       arguments.output_dir, arguments.threads)
         dirs_for_delete.add(cur_file_location)
 
-        long_reads = long_reads.split('.fastq')[0] + '.sam'
+        long_reads = os.path.splitext(long_reads.split('.gz')[0])[0] + '.sam'
         cur_file_location, uniq_map_sam = downsampling.run_downsampling(arguments.make_downsampling,
                                                                         arguments.ref_annot,
                                                                         f'{cur_file_location}{long_reads}',

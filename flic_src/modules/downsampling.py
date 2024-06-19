@@ -3,6 +3,7 @@ import logging
 import os
 import re
 import shutil
+import sys
 from collections import defaultdict
 
 import numpy as np
@@ -14,6 +15,7 @@ D_OF_GOOD_FLAGS = {'0': '+', '16': '-'}
 def read_annot_file(gtf_file):
     d_of_gene_coords = defaultdict(lambda: defaultdict(list))
     d_of_genes = defaultdict(lambda: defaultdict(str))
+    is_find_feat_gene = False
 
     with open(gtf_file) as annot:
         for line in annot:
@@ -27,11 +29,18 @@ def read_annot_file(gtf_file):
                 chrom_and_orientation = f'{line_l[0]}*{line_l[6]}'
                 start_pos = int(line_l[3])
                 end_pos = int(line_l[4])
-                gene_id = re.findall(r'gene_id "(.+?)";', line_l[8])[0]
+                gene_id = re.findall(r'gene_id "(.+?)"', line_l[8])[0]
+                is_find_feat_gene = True
 
                 for idx in range(start_pos, end_pos):
                     d_of_gene_coords[chrom_and_orientation][idx].append((start_pos, end_pos))
                 d_of_genes[chrom_and_orientation][(start_pos, end_pos)] = gene_id
+
+    if not is_find_feat_gene:
+        print('Error: The annotation needs to contain information about the gene structure (3rd column: feature). '
+              'See the GTF file in the example directory',
+              file=sys.stderr)
+        sys.exit(1)
     return d_of_gene_coords, d_of_genes
 
 

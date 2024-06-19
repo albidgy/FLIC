@@ -206,7 +206,7 @@ def read_annot_file(annot_file):
                 chrom_and_orientation = f'{line_l[0]}*{line_l[6]}'
                 start = int(line_l[3])
                 stop = int(line_l[4])
-                gene_id = re.findall(r'gene_id "(.+?)";', line_l[8])[0]
+                gene_id = re.findall(r'gene_id "(.+?)"', line_l[8])[0]
 
                 d_of_annot_genes[chrom_and_orientation][(start, stop)] = gene_id
     return d_of_annot_genes
