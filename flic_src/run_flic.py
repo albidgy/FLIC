@@ -3,7 +3,7 @@ import os
 import shutil
 import sys
 
-from flic_src.modules import make_iso, trim_map_ont, extract_fasta, downsampling_by_annot, find_start_polya, \
+from flic_src.modules import make_iso, trim_map_ont, extract_fasta, downsampling, find_start_polya, \
     make_correct_splice_sites, make_genes_from_iso, filter_by_1percent, create_annot
 from flic_src.scripts.external_tool_runner import Logger
 from flic_src.scripts import option_parser
@@ -48,13 +48,14 @@ def run_tool():
         dirs_for_delete.add(cur_file_location)
 
         long_reads = long_reads.split('.fastq')[0] + '.sam'
-        cur_file_location, uniq_map_sam = downsampling_by_annot.run_downsampling(arguments.make_downsampling,
-                                                                                 f'{cur_file_location}{long_reads}',
-                                                                                 arguments.ref_annot,
-                                                                                 arguments.threads,
-                                                                                 arguments.downsampling_max_thr,
-                                                                                 arguments.downsampling_min_thr,
-                                                                                 arguments.output_dir)
+        cur_file_location, uniq_map_sam = downsampling.run_downsampling(arguments.make_downsampling,
+                                                                        arguments.ref_annot,
+                                                                        f'{cur_file_location}{long_reads}',
+                                                                        arguments.ref_annot,
+                                                                        arguments.threads,
+                                                                        arguments.downsampling_max_thr,
+                                                                        arguments.downsampling_min_thr,
+                                                                        arguments.output_dir)
         dirs_for_delete.add(cur_file_location)
 
         changed_splice_sites_dir = make_correct_splice_sites.change_to_correct_splice_sites(uniq_map_sam,
@@ -86,8 +87,14 @@ def run_tool():
                                                  arguments.iso_thr1, arguments.output_dir)
     dirs_for_delete.add(genes_dir)
 
-    final_fpath_genes = make_genes_from_iso.move_geneids_from_annot(arguments.ref_annot,
-                                                                    f'{genes_dir}genes.tsv', arguments.output_dir)
+    if arguments.ref_annot is not None:
+        final_fpath_genes = make_genes_from_iso.move_geneids_from_annot(arguments.ref_annot,
+                                                                        f'{genes_dir}genes.tsv',
+                                                                        arguments.output_dir)
+    else:
+        final_fpath_genes = make_genes_from_iso.create_gene_ids_wo_annot(f'{genes_dir}genes.tsv',
+                                                                         arguments.output_dir)
+
     final_fpath_iso = make_iso.move_isoids_from_genes(iso_dir, final_fpath_genes, arguments.iso_thr2,
                                                       arguments.iso_thr1, arguments.output_dir)
     extract_fasta.extract_fasta(arguments.ref_fasta, final_fpath_genes, final_fpath_iso, arguments.output_dir)

@@ -256,3 +256,19 @@ def move_geneids_from_annot(annot_file, genes_file, out_dir):
                 ouf.write('\t'.join(line_l) + '\n')
 
     return out_fname
+
+
+def create_gene_ids_wo_annot(genes_file, out_dir):
+    out_fname = f'{out_dir}{os.path.basename(genes_file)}'
+    counter_genes = 1
+
+    with open(genes_file) as inf, open(out_fname, 'w') as ouf:
+        for line in inf:
+            line = line.strip('\n')
+            add_n_zeros = max(5 - len(str(counter_genes)), 0)
+            gene_id = f'gene_{"0" * add_n_zeros}{counter_genes}'
+
+            ouf.write(f'{line}\t{gene_id}\n')
+            counter_genes += 1
+
+    return out_fname

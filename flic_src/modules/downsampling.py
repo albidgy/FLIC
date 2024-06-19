@@ -35,6 +35,40 @@ def read_annot_file(gtf_file):
     return d_of_gene_coords, d_of_genes
 
 
+def make_d_of_chroms_and_d_of_read_coords_wo_annot(sam_file):
+    d_of_chroms = defaultdict(lambda: np.zeros(chrom_len, dtype=int))
+    d_of_reads_coords = defaultdict(lambda: defaultdict(dict))
+    d_of_chrom_lens = {}
+
+    with open(sam_file) as map_sam:
+        for line in map_sam:
+            line_l = line.strip('\n').split('\t')
+            if line[0] == '@':
+                if line.startswith('@SQ'):
+                    chromosome_name = line_l[1].split('SN:')[1]
+                    chromosome_len = int(line_l[2].split('LN:')[1]) + 3  # костыль из-за внеядерной ДНК
+                    d_of_chrom_lens[chromosome_name] = chromosome_len
+                else:
+                    continue
+            else:
+                read_id = line_l[0]
+                chrom = line_l[2]
+                strand = D_OF_GOOD_FLAGS[line_l[1]]
+                chrom_and_strand = f'{chrom}_{strand}'
+                chrom_len = d_of_chrom_lens[chrom]
+                start_ref = int(line_l[3]) + 1  # костыль из-за внеядерной ДНК
+                cigar_str = line_l[5]
+                end_ref, _ = get_correct_intron_and_end_pos(cigar_str, int(line_l[3]))
+
+                d_of_chroms[chrom_and_strand][start_ref:end_ref + 2] += 1  # костыль из-за внеядерной ДНК
+
+                split_starts_by_100_000 = start_ref // 100_000
+                if split_starts_by_100_000 not in d_of_reads_coords[chrom_and_strand].keys():
+                    d_of_reads_coords[chrom_and_strand][split_starts_by_100_000] = {}
+                d_of_reads_coords[chrom_and_strand][split_starts_by_100_000][read_id] = (start_ref, end_ref)
+    return d_of_chroms, d_of_reads_coords
+
+
 def drop_multimapping_reads(filename, downsampling_outdir):
     d_of_reads = defaultdict(list)
     system_lines = []
@@ -85,7 +119,7 @@ def get_correct_intron_and_end_pos(cigar_str, start_coord):
         if cigar == 'S':
             if idx == 0 or idx == len(l_of_splice_sites) - 1:
                 continue
-        elif cigar in 'I':
+        elif cigar == 'I':
             continue
         elif cigar == 'N':
             pos_of_introns.append((start_coord + counter_nucls, start_coord + counter_nucls + n_nucl - 1))
@@ -153,6 +187,32 @@ def get_sampled_read_names(pid, sam_file, d_of_gene_coords, d_of_genes, tmp_outd
     make_sampling(pid, d_of_gene_reads_cov, tmp_outdir, max_n_reads, min_n_reads)
 
 
+def add_reads_into_black_list(idx, d_of_reads_coords, black_list, max_n_reads):
+    l_of_searched_reads = []
+    ref_coord = idx // 100_000
+    l_of_keys = [ref_coord - 1, ref_coord, ref_coord + 1]
+
+    for cur_itter in l_of_keys:
+        if cur_itter in d_of_reads_coords.keys():
+            for read_id, val in d_of_reads_coords[cur_itter].items():
+                if read_id not in black_list and val[0] <= idx <= val[1]:
+                    l_of_searched_reads.append(read_id)
+    if len(l_of_searched_reads) > max_n_reads:
+        black_list.update(np.random.choice(l_of_searched_reads, len(l_of_searched_reads) - max_n_reads, replace=False))
+    return black_list
+
+
+def cut_cov_by_max_thr_wo_annot(pid, d_of_chroms, d_of_reads_coords, tmp_outdir, max_n_reads):
+    black_list = set()
+    for key, l_of_genome_cov in d_of_chroms.items():
+        for idx in range(len(l_of_genome_cov)):
+            if l_of_genome_cov[idx] > max_n_reads:
+                black_list = add_reads_into_black_list(idx, d_of_reads_coords[key], black_list, max_n_reads)
+
+    with open(f'{tmp_outdir}{pid}.txt', 'w') as ouf:
+        ouf.write('\n'.join(black_list) + '\n')
+
+
 def prepare_data_for_multiprocessing(d_of_gene_coords, d_of_genes, n_proc):
     d_of_gene_coords_by_proc = defaultdict(dict)
     d_of_genes_by_proc = defaultdict(dict)
@@ -189,27 +249,64 @@ def filter_sam_file(uniq_sam, tmp_outdir):
                         ouf.write(line)
 
 
-def run_downsampling(need_make_downsampling, sam_file, gtf_file, num_threads, max_n_reads, min_n_reads, common_outdir):
+def filter_sam_file_wo_annot(uniq_sam, tmp_outdir):
+    s_black_list = set()
+    final_outname = uniq_sam.replace('unique_map_', '')
+
+    for file in os.listdir(tmp_outdir):
+        with open(f'{tmp_outdir}{file}') as inf:
+            for line in inf:
+                s_black_list.add(line.strip('\n'))
+
+    with open(uniq_sam) as sam_file:
+        for line in sam_file:
+            if line[0] == '@':
+                with open(final_outname, 'a') as ouf:
+                    ouf.write(line)
+            else:
+                read_id = line.split('\t')[0]
+                if read_id not in s_black_list:
+                    with open(final_outname, 'a') as ouf:
+                        ouf.write(line)
+
+
+def run_downsampling(need_make_downsampling, ref_annot, sam_file, gtf_file,
+                     num_threads, max_n_reads, min_n_reads, common_outdir):
     logging.info(f'    Downsample reads by max threshold {str(max_n_reads)} reads per gene')
     downsampling_outdir = common_outdir + 'downsampled/'
     if not os.path.exists(downsampling_outdir):
         os.mkdir(downsampling_outdir)
 
-    d_of_gene_coords, d_of_genes = read_annot_file(gtf_file)
     with concurrent.futures.ProcessPoolExecutor(max_workers=1) as executor:  # need for clearing memory
         uniq_map_sam = executor.submit(drop_multimapping_reads, sam_file, downsampling_outdir, ).result()
 
     if need_make_downsampling:
         tmp_outdir = downsampling_outdir + 'tmp/'
         os.mkdir(tmp_outdir)
-        d_of_gene_coords_by_proc, d_of_genes_by_proc = prepare_data_for_multiprocessing(d_of_gene_coords,
-                                                                                        d_of_genes, num_threads)
-        _ = Parallel(n_jobs=num_threads)(delayed(get_sampled_read_names)(pid, uniq_map_sam,
-                                                                         d_of_gene_coords_by_proc[pid],
-                                                                         d_of_genes_by_proc[pid], tmp_outdir,
-                                                                         max_n_reads, min_n_reads)
-                                         for pid in d_of_gene_coords_by_proc.keys())
+        if ref_annot is not None:
+            d_of_gene_coords, d_of_genes = read_annot_file(gtf_file)
+            d_of_gene_coords_by_proc, d_of_genes_by_proc = prepare_data_for_multiprocessing(d_of_gene_coords,
+                                                                                            d_of_genes, num_threads)
+            _ = Parallel(n_jobs=num_threads)(delayed(get_sampled_read_names)(pid, uniq_map_sam,
+                                                                             d_of_gene_coords_by_proc[pid],
+                                                                             d_of_genes_by_proc[pid], tmp_outdir,
+                                                                             max_n_reads, min_n_reads)
+                                             for pid in d_of_gene_coords_by_proc.keys())
 
-        filter_sam_file(f'{uniq_map_sam}', tmp_outdir)
+            filter_sam_file(f'{uniq_map_sam}', tmp_outdir)
+        else:
+            d_of_chroms, d_of_reads_coords = make_d_of_chroms_and_d_of_read_coords_wo_annot(uniq_map_sam)
+            d_of_chroms_by_proc, d_of_reads_coords_by_proc = prepare_data_for_multiprocessing(d_of_chroms,
+                                                                                              d_of_reads_coords,
+                                                                                              num_threads)
+            _ = Parallel(n_jobs=num_threads)(delayed(cut_cov_by_max_thr_wo_annot)(pid,
+                                                                                  d_of_chroms_by_proc[pid],
+                                                                                  d_of_reads_coords_by_proc[pid],
+                                                                                  tmp_outdir,
+                                                                                  max_n_reads)
+                                             for pid in d_of_chroms_by_proc.keys())
+
+            filter_sam_file_wo_annot(uniq_map_sam, tmp_outdir)
+
         shutil.rmtree(tmp_outdir)
     return downsampling_outdir, uniq_map_sam

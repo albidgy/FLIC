@@ -4,7 +4,7 @@ import os
 from flic_src.scripts import external_tool_runner
 
 
-def run_porechop(long_reads, common_outdir, num_threads, ):
+def run_porechop(long_reads, common_outdir, num_threads):
     logging.info('    Trim long reads using Porechop')
     porechop_outdir = common_outdir + 'porechop_output/'
     if not os.path.exists(porechop_outdir):

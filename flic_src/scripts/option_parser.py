@@ -18,7 +18,7 @@ def parser_arguments():
                               help='Path to reference FASTA file',
                               )
     general_args.add_argument('--ref_annot',
-                              required=True,
+                              default=None,
                               help='Path to reference annotation file in GTF format',
                               )
     general_args.add_argument('-t',
