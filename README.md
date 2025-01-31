@@ -67,8 +67,8 @@ flic [OPTIONS] --long_reads /path/to/ont_rep1.fastq,/path/to/ont_rep2.fastq \
 <span style="font-size:1.2em;"> General arguments </span>
 
 ```
---long_reads              Long reads at least in 2 replicates in fastq, fastq.gz or sam format separated by commas. 
-                          Example: /path/to/ont_rep1.fastq,/path/to/ont_rep2.fastq
+--long_reads              Long reads at least in 2 replicates in fastq, fastq.gz or sam format 
+                          separated by commas. Example: /path/to/ont_rep1.fastq,/path/to/ont_rep2.fastq
                     
 --ref_fasta               Path to reference FASTA file. 
                           Example: /path/to/reference_fasta.fasta
