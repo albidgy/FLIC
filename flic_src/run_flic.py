@@ -22,6 +22,7 @@ def run_tool():
                         format="%(levelname)s:  %(asctime)s  %(message)s",
                         datefmt="%Y-%m-%d %H:%M:%S",
                         handlers=[logging.FileHandler(f"{arguments.output_dir}FLIC.log"), logging.StreamHandler()])
+    logging.info(f'Command: {"".join(sys.argv)}')
     logging.info('____Getting started FLIC____')
 
     l_of_ont_reads = arguments.long_reads.split(',')
@@ -40,21 +41,22 @@ def run_tool():
         cur_file_location = os.path.abspath(os.path.dirname(long_reads)) + '/'
         long_reads = os.path.basename(long_reads)
 
-        if arguments.trim_long_reads:
-            cur_file_location = trim_map_ont.run_porechop(f'{cur_file_location}{long_reads}',
+        if long_reads.split('.')[-1] != 'sam':
+            if arguments.trim_long_reads:
+                cur_file_location = trim_map_ont.run_porechop(f'{cur_file_location}{long_reads}',
+                                                              arguments.output_dir, arguments.threads)
+                dirs_for_delete.add(cur_file_location)
+
+            if arguments.cut_adapt:
+                cur_file_location = trim_map_ont.run_cutadapt(f'{cur_file_location}{long_reads}',
+                                                              arguments.output_dir, arguments.threads)
+                dirs_for_delete.add(cur_file_location)
+
+            cur_file_location = trim_map_ont.run_minimap2(f'{cur_file_location}{long_reads}', arguments.ref_fasta,
                                                           arguments.output_dir, arguments.threads)
             dirs_for_delete.add(cur_file_location)
+            long_reads = os.path.splitext(long_reads.split('.gz')[0])[0] + '.sam'
 
-        if arguments.cut_adapt:
-            cur_file_location = trim_map_ont.run_cutadapt(f'{cur_file_location}{long_reads}',
-                                                          arguments.output_dir, arguments.threads)
-            dirs_for_delete.add(cur_file_location)
-
-        cur_file_location = trim_map_ont.run_minimap2(f'{cur_file_location}{long_reads}', arguments.ref_fasta,
-                                                      arguments.output_dir, arguments.threads)
-        dirs_for_delete.add(cur_file_location)
-
-        long_reads = os.path.splitext(long_reads.split('.gz')[0])[0] + '.sam'
         cur_file_location, uniq_map_sam = downsampling.run_downsampling(arguments.make_downsampling,
                                                                         arguments.ref_annot,
                                                                         f'{cur_file_location}{long_reads}',
@@ -75,14 +77,19 @@ def run_tool():
             sample_fname = long_reads
         else:
             sample_fname = 'unique_map_' + long_reads
-        bam_dir = trim_map_ont.convert_sam2bam(f"{cur_file_location}{sample_fname}",
-                                               arguments.output_dir, arguments.threads)
-        dirs_for_delete.add(bam_dir)
+
+        if arguments.peaks_dir is None:
+            bam_dir = trim_map_ont.convert_sam2bam(f"{cur_file_location}{sample_fname}",
+                                                   arguments.output_dir, arguments.threads)
+            dirs_for_delete.add(bam_dir)
         counter_files += 1
 
-    cagefightr_res_dir = find_start_polya.find_starts_polya(bam_dir, arguments.ref_fasta,
-                                                            arguments.output_dir)
-    dirs_for_delete.add(os.path.split(os.path.abspath(cagefightr_res_dir))[0])
+    if arguments.peaks_dir is None:
+        cagefightr_res_dir = find_start_polya.find_starts_polya(bam_dir, arguments.ref_fasta,
+                                                                arguments.output_dir)
+        dirs_for_delete.add(os.path.split(os.path.abspath(cagefightr_res_dir))[0])
+    else:
+        cagefightr_res_dir = arguments.peaks_dir
 
     logging.info('Reconstruct isoforms')
     for changed_splice_file in os.listdir(changed_splice_sites_dir):

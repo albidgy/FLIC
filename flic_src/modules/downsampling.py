@@ -55,7 +55,7 @@ def make_d_of_chroms_and_d_of_read_coords_wo_annot(sam_file):
             if line[0] == '@':
                 if line.startswith('@SQ'):
                     chromosome_name = line_l[1].split('SN:')[1]
-                    chromosome_len = int(line_l[2].split('LN:')[1]) + 3  # костыль из-за внеядерной ДНК
+                    chromosome_len = int(line_l[2].split('LN:')[1]) + 3  # needed for correct work with extranuclear DNA
                     d_of_chrom_lens[chromosome_name] = chromosome_len
                 else:
                     continue
@@ -65,11 +65,11 @@ def make_d_of_chroms_and_d_of_read_coords_wo_annot(sam_file):
                 strand = D_OF_GOOD_FLAGS[line_l[1]]
                 chrom_and_strand = f'{chrom}_{strand}'
                 chrom_len = d_of_chrom_lens[chrom]
-                start_ref = int(line_l[3]) + 1  # костыль из-за внеядерной ДНК
+                start_ref = int(line_l[3]) + 1  # needed for correct work with extranuclear DNA
                 cigar_str = line_l[5]
                 end_ref, _ = get_correct_intron_and_end_pos(cigar_str, int(line_l[3]))
 
-                d_of_chroms[chrom_and_strand][start_ref:end_ref + 2] += 1  # костыль из-за внеядерной ДНК
+                d_of_chroms[chrom_and_strand][start_ref:end_ref + 2] += 1  # needed for correct work with extranuclear DNA
 
                 split_starts_by_100_000 = start_ref // 100_000
                 if split_starts_by_100_000 not in d_of_reads_coords[chrom_and_strand].keys():

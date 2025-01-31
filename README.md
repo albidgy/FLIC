@@ -16,7 +16,7 @@ FLIC has a modular structure:
 - <span style="font-size:1.1em;"> MAPPING MODULE </span> takes trimmed ONT reads and the reference genome assembly and maps them in a splice mode;
 - <span style="font-size:1.1em;"> SPLICE SITES IDENTIFICATION MODULE </span> for each read, the coordinates of extended gaps labeled with the symbol “N” were extracted from the CIGAR string of an alignment and stored in an intermediate file;
 - <span style="font-size:1.1em;"> SPLICE SITES CORRECTION MODULE </span> splice sites extracted from long read mapping are compared to the splice sites DB derived from Illumina read mapping or extracted from genome annotation to validate the splice sites derived from long reads;
-- <span style="font-size:1.1em;"> DOWNSAMPLING MODULE </span> (<b><i> optional </i></b>) deals with highly expressed genes: for genes that produce large amount of RNA molecules the absolute number of long reads derived from tattered RNA is high which can result in incorrect TSS identification. To resolve the issue, a fixed number (1000 by default) of reads is randomly selected from all reads mapped on a highly expressed  gene. This step depends on genome annotation. It is recommended to use this optional module;
+- <span style="font-size:1.1em;"> DOWNSAMPLING MODULE </span> (<b><i> optional </i></b>) deals with highly expressed genes: for genes that produce large amount of RNA molecules the absolute number of long reads derived from tattered RNA is high which can result in incorrect TSS identification. To resolve the issue, a fixed number (1000 by default) of reads is randomly selected from all reads mapped on a highly expressed  gene. This step can be done using a genome annotation, if it is available, or can be run in an annotation-free mode. In the latter case at first step the coverage by uniquely mapped reads is calculated and compared with the threshold value (1000 by default). For regions for which the coverage exceeds this threshold, reads are randomly removed in an iterative way until all the positions in this region have coverage smaller than the threshold. It is recommended to use this optional module;
 - <span style="font-size:1.1em;"> START-AND-STOP GENERATION MODULE </span> is based on peak calling. Mapped reads (either downsampled or not) are used for identification of regions corresponding to 5’-end coordinates (presumable TSSs) and 3’-end coordinates (possible polyA sites);
 - <span style="font-size:1.1em;"> ISOFORMS RECONSTRUCTION MODULE </span> searches each read against a list of TSSs and polyA sites identified by start-and-stop generation module. Reads with identical TSS region, set of splicing sites and polyA sites region are grouped together and form isoform.  Correct isoforms are compared with each other by coordinates and join in genes.
 
@@ -67,14 +67,11 @@ flic [OPTIONS] --long_reads /path/to/ont_rep1.fastq,/path/to/ont_rep2.fastq \
 <span style="font-size:1.2em;"> General arguments </span>
 
 ```
---long_reads              Long reads in fastq or fastq.gz format separated by commas. 
+--long_reads              Long reads at least in 2 replicates in fastq, fastq.gz or sam format separated by commas. 
                           Example: /path/to/ont_rep1.fastq,/path/to/ont_rep2.fastq
                     
 --ref_fasta               Path to reference FASTA file. 
                           Example: /path/to/reference_fasta.fasta
-                    
---ref_annot               Path to reference annotation file in GTF format.
-                          Example: /path/to/reference_annotation.gtf
                     
 -t / --threads            Number of threads [default: 1]
 
@@ -89,10 +86,15 @@ flic [OPTIONS] --long_reads /path/to/ont_rep1.fastq,/path/to/ont_rep2.fastq \
 --extra_filter_iso        (Isoforms reconstruction module) Perform additional filtering of final isoforms 
                           based on expression levels greater than or equal to 1% of total gene expression. 
                           NOTE: gene boundaries will not be changed
+
+-v / --version            Show a version of tool and exit
 ```
 <span style="font-size:1.2em;"> Optional arguments </span>
 
 ```
+--ref_annot               Path to reference annotation file in GTF format.
+                          Example: /path/to/reference_annotation.gtf
+                          
 --splice_sites            (Splice sites correction module) Path to file with a list of splice sites
 
 --downsampling_min_thr    (Downsampling module) Number of reads per gene less than a specified value is 
@@ -107,6 +109,8 @@ flic [OPTIONS] --long_reads /path/to/ont_rep1.fastq,/path/to/ont_rep2.fastq \
 --iso_thr2                (Isoforms reconstruction module) Minimum number of reads forming an isoform in 
                           another replicate [default: 1]
 ```
+FLIC is based on the assumption that convergence of isoforms across replicates is extremely important for isoform reconstruction. 
+In this regard, at least 2 replicates are required for the program to work correctly.
 
 As output FLIC provides reconstructed isoforms and genes in FASTA format along with pseudo-alignment of isoforms for each gene and annotation in GTF format.
 

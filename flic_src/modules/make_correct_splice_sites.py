@@ -38,7 +38,7 @@ def split_cigar(cigar_str):
     l_of_splice_sites = []
     tmp_val = []
     for elem in cigar_str:
-        if elem in ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']:
+        if elem in {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0'}:
             tmp_val.append(elem)
         else:
             l_of_splice_sites.append((elem, ''.join(tmp_val)))

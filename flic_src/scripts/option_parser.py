@@ -2,7 +2,7 @@ import argparse
 from datetime import datetime
 
 
-VERSION = 'v. 1.0'
+VERSION = 'v. 1.1'
 
 
 def parser_arguments():
@@ -84,5 +84,9 @@ def parser_arguments():
                                default=1,
                                type=int,
                                help='Minimum number of reads forming an isoform in another replicate [default: 1]'
+                               )
+    optional_args.add_argument('--peaks_dir',
+                               default=None,
+                               help='Use existing TSS and PA peaks located in a separate directory'
                                )
     return parser.parse_args()
