@@ -40,12 +40,9 @@ To install this programs in separate conda environment ```flic_env```:
 conda env create -f flic_env.yml
 ```
 
-Next install FLIC using pip:
+Next activated the created environment:
 ```bash
-pip3 install .
-
-# check FLIC installation
-flic --help
+conda activate flic_env
 ```
 
 ## Command line options
