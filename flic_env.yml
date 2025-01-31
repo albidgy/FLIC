@@ -1,0 +1,23 @@
+name: flic_env
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - minimap2=2.24
+  - samtools=1.17
+  - bedtools=2.30.0
+  - ucsc-bedgraphtobigwig
+  - porechop=0.2.4
+  - pip
+  - pip:
+      - cutadapt
+      - joblib==1.3.2
+      - networkx==3.1
+      - numpy==1.24.4
+      - .  
+  - r-base=4.3
+  - r-biocmanager
+  - r-argparse
+  - bioconductor-cagefightr

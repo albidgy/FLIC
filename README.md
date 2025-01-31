@@ -35,19 +35,9 @@ FLIC requies Python (v. 3.10+) and R (v. 4.3+). The following external programs 
 - [bedtools v. 2.30.0](https://github.com/arq5x/bedtools2)
 - [BedGraphToBigWig v. 4](https://github.com/ENCODE-DCC/kentUtils)
 
-To install this programs in separate conda environment ```flic_env```, run the _create_flic_env.sh_ script:
+To install this programs in separate conda environment ```flic_env```:
 ```bash
-bash create_flic_env.sh
-```
-
-The installation of the R [CAGEfightR](https://bioconductor.org/packages/release/bioc/html/CAGEfightR.html) and [argparse](https://cran.r-project.org/web/packages/argparse/index.html) packages is also required. Note that R packages need to be installed sequentially.
-```R
-if (!require("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
-BiocManager::install("CAGEfightR")
-```
-```R
-install.packages("argparse")
+conda env create -f flic_env.yml
 ```
 
 Next install FLIC using pip:
