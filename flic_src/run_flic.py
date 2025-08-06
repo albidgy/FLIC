@@ -22,7 +22,7 @@ def run_tool():
                         format="%(levelname)s:  %(asctime)s  %(message)s",
                         datefmt="%Y-%m-%d %H:%M:%S",
                         handlers=[logging.FileHandler(f"{arguments.output_dir}FLIC.log"), logging.StreamHandler()])
-    logging.info(f'Command: {"".join(sys.argv)}')
+    logging.info(f'Command: {" ".join(sys.argv)}')
     logging.info('____Getting started FLIC____')
 
     l_of_ont_reads = arguments.long_reads.split(',')
@@ -53,7 +53,8 @@ def run_tool():
                 dirs_for_delete.add(cur_file_location)
 
             cur_file_location = trim_map_ont.run_minimap2(f'{cur_file_location}{long_reads}', arguments.ref_fasta,
-                                                          arguments.output_dir, arguments.threads)
+                                                          arguments.output_dir, arguments.max_intron_len,
+                                                          arguments.threads)
             dirs_for_delete.add(cur_file_location)
             long_reads = os.path.splitext(long_reads.split('.gz')[0])[0] + '.sam'
 
@@ -118,9 +119,10 @@ def run_tool():
         filter_by_1percent.filter_by_1percent(iso_dir, arguments.iso_thr1, arguments.iso_thr2,
                                               final_fpath_iso, arguments.output_dir)
 
-    logging.info('Clear intermediate dirs')
-    for dir_name in dirs_for_delete:
-        shutil.rmtree(dir_name)
+    if not arguments.keep_tmp_files:
+        logging.info('Clear intermediate dirs')
+        for dir_name in dirs_for_delete:
+            shutil.rmtree(dir_name)
     logging.info('____FLIC finished successfully____')
 
 

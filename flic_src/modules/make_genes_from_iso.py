@@ -11,13 +11,17 @@ from joblib import Parallel, delayed
 def read_isoform_files(path_to_dir, thr_1st, thr_2nd):
     d_of_isoforms = defaultdict(list)
     d_good_iso = {}
+    n_replicates = len(os.listdir(path_to_dir))
 
-    for file in os.listdir(path_to_dir):
+    for idx, file in enumerate(os.listdir(path_to_dir)):
         with open(f'{path_to_dir}{file}') as rep:
             for line in rep:
                 *line_l, cov = line.strip('\n').split('\t')
                 cov = int(cov)
-                d_of_isoforms['\t'.join(line_l)].append(cov)
+                iso_struct = '\t'.join(line_l)
+                if iso_struct not in d_of_isoforms:
+                    d_of_isoforms[iso_struct] = [0] * n_replicates
+                d_of_isoforms[iso_struct][idx] += cov
 
     for key, val in d_of_isoforms.items():
         if sum([x >= thr_1st for x in val]) > 1 and sum([x >= thr_2nd for x in val]) > 0:

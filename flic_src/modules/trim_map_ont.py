@@ -24,12 +24,12 @@ def run_cutadapt(long_reads, common_outdir, num_threads):
     return cutadapt_outdir
 
 
-def run_minimap2(long_reads, ref_fasta, common_outdir, num_threads):
+def run_minimap2(long_reads, ref_fasta, common_outdir, max_intron_len, num_threads):
     logging.info('    Map long reads to reference using minimap2')
     minimap2_outdir = common_outdir + 'minimap2_output/'
     if not os.path.exists(minimap2_outdir):
         os.mkdir(minimap2_outdir)
-    cmd_minimap2 = f"minimap2 -ax splice -k14 -uf -t {num_threads} -G 10k {ref_fasta} {long_reads} > {minimap2_outdir}{os.path.basename(os.path.splitext(long_reads.split('.gz')[0])[0])}.sam"
+    cmd_minimap2 = f"minimap2 -ax splice -k14 -uf -t {num_threads} -G {max_intron_len} {ref_fasta} {long_reads} > {minimap2_outdir}{os.path.basename(os.path.splitext(long_reads.split('.gz')[0])[0])}.sam"
     external_tool_runner.run_external_tool(cmd_minimap2, common_outdir)
     return minimap2_outdir
 

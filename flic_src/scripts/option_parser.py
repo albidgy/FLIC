@@ -64,6 +64,11 @@ def parser_arguments():
                                default=None,
                                help='Path to file with a list of splice sites',
                                )
+    optional_args.add_argument('--max_intron_len',
+                               default='10k',
+                               help='Maximum intron length for minimap2 (corresponds to the -G parameter). Accepts '
+                                    'values as a number with suffixes k (thousands) or m (millions) [default: 10k]',
+                               )
     optional_args.add_argument('--downsampling_min_thr',
                                default=5,
                                type=int,
@@ -78,15 +83,20 @@ def parser_arguments():
     optional_args.add_argument('--iso_thr1',
                                default=5,
                                type=int,
-                               help='Minimum number of reads forming an isoform at least in 1 replicate [default: 5]'
+                               help='Minimum number of reads forming an isoform at least in 1 replicate [default: 5]',
                                )
     optional_args.add_argument('--iso_thr2',
                                default=1,
                                type=int,
-                               help='Minimum number of reads forming an isoform in another replicate [default: 1]'
+                               help='Minimum number of reads forming an isoform in another replicate [default: 1]',
                                )
     optional_args.add_argument('--peaks_dir',
                                default=None,
-                               help='Use existing TSS and PA peaks located in a separate directory'
+                               help='Use existing TSS and PA peaks located in a separate directory',
+                               )
+    optional_args.add_argument('--keep_tmp_files',
+                               default=False,
+                               action='store_true',
+                               help='Keep all temporary files [default: False]',
                                )
     return parser.parse_args()
