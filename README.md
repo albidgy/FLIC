@@ -96,7 +96,7 @@ flic [OPTIONS] --long_reads /path/to/ont_rep1.fastq,/path/to/ont_rep2.fastq \
 --iso_thr2                (Isoforms reconstruction module) Minimum number of reads forming an isoform in 
                           another replicate [default: 1]
 
---keep_tmp_files          Keep all temporary files [default: False]
+--keep_tmp_files          Keep all temporary files
 ```
 FLIC is based on the assumption that convergence of isoforms across replicates is extremely important for isoform reconstruction. 
 In this regard, at least 2 replicates are required for the program to work correctly.
