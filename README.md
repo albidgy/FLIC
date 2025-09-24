@@ -1,7 +1,7 @@
 # FLIC: Full-Length Isoform Constructor
 
 FLIC allows to reconstruct isoforms from transcription start site (TSS) to polyA site. 
-The main source of information on isoform structure is long reads; in addition, tool uses genome assembly, annotation 
+The main source of information on isoform structure is long reads oriented in the 5’→3’ direction. In addition, tool uses genome assembly, annotation (_optional_)
 and a set of splice junction coordinates (_optional_). 
 64-bit Linux and macOS are supported.
 
@@ -16,9 +16,12 @@ FLIC has a modular structure:
 - <span style="font-size:1.1em;"> MAPPING MODULE </span> takes trimmed ONT reads and the reference genome assembly and maps them in a splice mode;
 - <span style="font-size:1.1em;"> SPLICE SITES IDENTIFICATION MODULE </span> for each read, the coordinates of extended gaps labeled with the symbol “N” were extracted from the CIGAR string of an alignment and stored in an intermediate file;
 - <span style="font-size:1.1em;"> SPLICE SITES CORRECTION MODULE </span> splice sites extracted from long read mapping are compared to the splice sites DB derived from Illumina read mapping or extracted from genome annotation to validate the splice sites derived from long reads;
-- <span style="font-size:1.1em;"> DOWNSAMPLING MODULE </span> (<b><i> optional </i></b>) deals with highly expressed genes: for genes that produce large amount of RNA molecules the absolute number of long reads derived from tattered RNA is high which can result in incorrect TSS identification. To resolve the issue, a fixed number (1000 by default) of reads is randomly selected from all reads mapped on a highly expressed  gene. This step can be done using a genome annotation, if it is available, or can be run in an annotation-free mode. In the latter case at first step the coverage by uniquely mapped reads is calculated and compared with the threshold value (1000 by default). For regions for which the coverage exceeds this threshold, reads are randomly removed in an iterative way until all the positions in this region have coverage smaller than the threshold. It is recommended to use this optional module;
+- <span style="font-size:1.1em;"> DOWNSAMPLING MODULE </span> (<b><i> optional </i></b>) deals with highly expressed genes: for genes that produce large amount of RNA molecules the absolute number of long reads derived from fragmented RNA is high which can result in incorrect TSS identification. To resolve the issue, a fixed number (1000 by default) of reads is randomly selected from all reads mapped on a highly expressed  gene. This step can be done using a genome annotation, if it is available, or can be run in an annotation-free mode. In the latter case at first step the coverage by uniquely mapped reads is calculated and compared with the threshold value (1000 by default). For regions for which the coverage exceeds this threshold, reads are randomly removed in an iterative way until all the positions in this region have coverage smaller than the threshold. It is recommended to use this optional module;
 - <span style="font-size:1.1em;"> START-AND-STOP GENERATION MODULE </span> is based on peak calling. Mapped reads (either downsampled or not) are used for identification of regions corresponding to 5’-end coordinates (presumable TSSs) and 3’-end coordinates (possible polyA sites);
 - <span style="font-size:1.1em;"> ISOFORMS RECONSTRUCTION MODULE </span> searches each read against a list of TSSs and polyA sites identified by start-and-stop generation module. Reads with identical TSS region, set of splicing sites and polyA sites region are grouped together and form isoform.  Correct isoforms are compared with each other by coordinates and join in genes.
+
+> [!NOTE]
+> It is highly recommended that the reads that you provide to FLIC correspond to whole (non-fragmented) RNAs. This allows for more precise isoform reconstruction. To remove reads corresponding to fragmented RNAs you can use [NTproc](https://github.com/shelkmike/NTproc).
 
 ## Installation
 To begin, download FLIC:
@@ -58,7 +61,7 @@ flic [OPTIONS] --long_reads /path/to/ont_rep1.fastq,/path/to/ont_rep2.fastq \
                           separated by commas. Example: /path/to/ont_rep1.fastq,/path/to/ont_rep2.fastq
                     
 --ref_fasta               Path to reference FASTA file. 
-                          Example: /path/to/reference_fasta.fasta
+                          Example: /path/to/genome.fasta
                     
 -t / --threads            Number of threads [default: 1]
 
@@ -67,6 +70,9 @@ flic [OPTIONS] --long_reads /path/to/ont_rep1.fastq,/path/to/ont_rep2.fastq \
 --trim_long_reads         (Read quality module) Add trimming long reads step by using Porechop tool
 
 --cut_adapt               (Read quality module) Cut polyA tail of long reads by using cutadapt tool
+
+--max_intron_len          (Mapping module) Maximum intron length for minimap2 (corresponds to the -G parameter). 
+                          Accepts values as a number with suffixes k (thousands) or m (millions) [default: 10k]
 
 --make_downsampling       (Downsampling module) Make a downsampling long reads by given threshold
 
@@ -80,7 +86,7 @@ flic [OPTIONS] --long_reads /path/to/ont_rep1.fastq,/path/to/ont_rep2.fastq \
 
 ```
 --ref_annot               Path to reference annotation file in GTF format.
-                          Example: /path/to/reference_annotation.gtf
+                          Example: /path/to/annotation.gtf
                           
 --splice_sites            (Splice sites correction module) Path to file with a list of splice sites
 
