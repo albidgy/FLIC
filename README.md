@@ -20,7 +20,7 @@ FLIC has a modular structure:
 - <span style="font-size:1.1em;"> START-AND-STOP GENERATION MODULE </span> is based on peak calling. Mapped reads (either downsampled or not) are used for identification of regions corresponding to 5’-end coordinates (presumable TSSs) and 3’-end coordinates (possible polyA sites);
 - <span style="font-size:1.1em;"> ISOFORMS RECONSTRUCTION MODULE </span> searches each read against a list of TSSs and polyA sites identified by start-and-stop generation module. Reads with identical TSS region, set of splicing sites and polyA sites region are grouped together and form isoform.  Correct isoforms are compared with each other by coordinates and join in genes.
 
-> [!NOTE]
+> [!IMPORTANT]
 > It is highly recommended that the reads that you provide to FLIC correspond to whole (non-fragmented) RNAs. This allows for more precise isoform reconstruction. To remove reads corresponding to fragmented RNAs you can use [NTproc](https://github.com/shelkmike/NTproc).
 
 ## Installation
