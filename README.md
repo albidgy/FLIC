@@ -37,6 +37,7 @@ FLIC requies Python (v. 3.10+) and R (v. 4.3+). The following external programs 
 - [samtools v. 1.15.1+](https://github.com/samtools/samtools)
 - [bedtools v. 2.30.0](https://github.com/arq5x/bedtools2)
 - [BedGraphToBigWig v. 4](https://github.com/ENCODE-DCC/kentUtils)
+- [orfipy v. 0.0.4](https://github.com/urmi-21/orfipy)
 
 To install this programs in separate conda environment ```flic_env```:
 ```bash

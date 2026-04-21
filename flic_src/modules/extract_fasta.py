@@ -121,7 +121,7 @@ def extract_transcripts_seq(file_isoform_coords, d_of_gene_coords, d_of_fasta, o
                 final_seq = split_fasta_by_n_nucl(''.join(correct_transcript_seq).replace('-', ''))
                 ouf.write(f'>{transcript_id}\n')
                 ouf.write(final_seq + '\n')
-    return d_of_transcripts
+    return d_of_transcripts, out_fname
 
 
 def make_pseudoalignments(d_of_gene_seqs, d_of_transcripts, out_dir):
@@ -143,6 +143,7 @@ def extract_fasta(fasta_file, final_fpath_genes, final_fpath_iso, out_dir):
     logging.info('Extract sequences of genes and isoforms')
     d_of_fasta = read_fasta(fasta_file)
     d_of_gene_seqs, d_of_gene_coords = extract_gene_seqs(final_fpath_genes, d_of_fasta, out_dir)
-    d_of_transcripts = extract_transcripts_seq(final_fpath_iso, d_of_gene_coords, d_of_fasta, out_dir)
+    d_of_transcripts, trascripts_seq_fpath = extract_transcripts_seq(final_fpath_iso, d_of_gene_coords, d_of_fasta, out_dir)
     logging.info('Create pseudoalignments')
     make_pseudoalignments(d_of_gene_seqs, d_of_transcripts, out_dir)
+    return trascripts_seq_fpath
