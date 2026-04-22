@@ -6,7 +6,7 @@ from collections import defaultdict
 from flic_src.scripts import external_tool_runner
 
 
-GENE_ID_RE = re.compile(r'gene_id "(.+?)"')
+ORF_LEN_RE = re.compile('ORF_len=(\d+)')
 TRANSCRIPT_ID_RE = re.compile(r'transcript_id "(.+?)"')
 
 
@@ -113,9 +113,30 @@ def create_gtf_file(isoform_fpath, genes_fpath, out_dir, version):
 def run_orfipy(iso_seq_fpath, num_threads, common_outdir):
     logging.info('    Predict ORFs using orfipy')
     orfipy_outdir = os.path.join(common_outdir, 'predicted_orfs/')
-    cmd_orfipy = f'orfipy --min 300 --max 100000 --include-stop --longest --strand f --procs {num_threads} --start ATG --outdir {orfipy_outdir} --bed isoforms_orfs.bed {iso_seq_fpath}'
+    cmd_orfipy = f'orfipy --min 300 --max 100000 --include-stop --strand f --procs {num_threads} --start ATG --outdir {orfipy_outdir} --bed isoforms_orfs.bed {iso_seq_fpath}'
     external_tool_runner.run_external_tool(cmd_orfipy, common_outdir)
-    return os.path.join(orfipy_outdir, 'isoforms_orfs_longest.bed')
+    return os.path.join(orfipy_outdir, 'isoforms_orfs.bed')
+
+
+def keep_longest_orfs(orfipy_fpath):
+    d_longest_orfs_by_iso = {}
+    orfipy_oufpath = orfipy_fpath.replace('.bed', '_longest.bed')
+    with open(orfipy_fpath) as inf:
+        for line in inf:
+            line_l = line.strip('\n').split('\t')
+            iso_id = line_l[0]
+            orf_len = int(ORF_LEN_RE.search(line_l[3]).group(1))
+            if iso_id not in d_longest_orfs_by_iso:
+                d_longest_orfs_by_iso[iso_id] = (0, None)
+
+            if orf_len > d_longest_orfs_by_iso[iso_id][0]:
+                d_longest_orfs_by_iso[iso_id] = (orf_len, line)
+
+    with open(orfipy_oufpath, 'w') as ouf:
+        for iso_id in d_longest_orfs_by_iso:
+            ouf.write(d_longest_orfs_by_iso[iso_id][1])
+
+    return orfipy_oufpath
 
 
 def read_bed_file(bed_fpath):
@@ -220,7 +241,8 @@ def add_cds_lines(anno_fpath, d_cds_coords, anno_oufpath):
 
 def add_cds_into_anno(anno_fpath, iso_seq_fpath, num_threads, common_outdir):
     anno_oufpath = os.path.join(common_outdir, os.path.basename(anno_fpath).replace('_wo_cds.gtf', '.gtf'))
-    bed_fpath = run_orfipy(iso_seq_fpath, num_threads, common_outdir)
+    orfipy_fpath = run_orfipy(iso_seq_fpath, num_threads, common_outdir)
+    bed_fpath = keep_longest_orfs(orfipy_fpath)
     d_orf_coords = read_bed_file(bed_fpath)
     d_iso_info = extract_exon_coords(anno_fpath)
 
